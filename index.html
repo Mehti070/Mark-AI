@@ -1,185 +1,107 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Mark AI</title>
-<style>
-:root{--bg:#11131b;--panel:#171a24;--line:#262a38;--text:#e7e9f1;--mute:#8b90a3;--acc:#6b86ff;--acc2:#2c3566;--user:#1f2640;--r:14px}
-*{box-sizing:border-box}
-html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--text);font:15px/1.6 "Segoe UI",system-ui,-apple-system,sans-serif;display:flex;overflow:hidden}
-button,select,textarea,input{font:inherit;color:inherit}
-button{cursor:pointer}
-:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
-#side{width:270px;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:12px;gap:10px;flex:none}
-.brand{font-size:20px;font-weight:700;letter-spacing:.2px;padding:4px 6px}
-.brand i{font-style:normal;color:var(--acc)}
-.btn{background:var(--acc2);border:1px solid #3a4685;border-radius:10px;padding:9px 12px;text-align:left}
-.btn:hover{background:#34407a}
-#list{flex:1;overflow:auto;display:flex;flex-direction:column;gap:2px}
-.chat{display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:9px;color:var(--mute);cursor:pointer}
-.chat span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.chat:hover,.chat.on{background:#202433;color:var(--text)}
-.chat b{font-weight:400;opacity:0;border:0;background:none;color:var(--mute);padding:0 4px}
-.chat:hover b{opacity:1}
-#main{flex:1;display:flex;flex-direction:column;min-width:0;padding-top:env(safe-area-inset-top,0px)}
-header{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line)}
-#menu{display:none;background:none;border:1px solid var(--line);border-radius:8px;padding:4px 10px}
-#status{margin-left:auto;color:var(--mute);font-size:13px}
-#msgs{flex:1;overflow:auto;padding:20px 16px}
-.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
-.m{display:flex;flex-direction:column;gap:4px}
-.m small{color:var(--mute);font-size:12px}
-.bub{padding:10px 14px;border-radius:var(--r);overflow-wrap:anywhere}
-.u .bub{background:var(--user);align-self:flex-end;max-width:85%}
-.u small{align-self:flex-end}
-.a .bub{padding-left:0;padding-right:0}
-.bub code{background:#222638;padding:1px 6px;border-radius:6px;font:13px Consolas,monospace}
-.code{position:relative;background:#0c0e15;border:1px solid var(--line);border-radius:10px;margin:8px 0}
-.code pre{margin:0;padding:12px 14px;overflow:auto;font:13px/1.5 Consolas,monospace}
-.code button{position:absolute;top:6px;right:6px;background:#222638;border:1px solid var(--line);border-radius:7px;font-size:12px;padding:2px 8px}
-#empty{margin:12vh auto 0;text-align:center;color:var(--mute)}
-#empty h1{font-size:56px;margin:0 0 6px;color:var(--text);letter-spacing:-1px}
-#empty h1 i{font-style:normal;color:var(--acc)}
-#empty p{margin:0}
-form{padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px))}
-.box{max-width:760px;margin:0 auto;display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:8px}
-textarea{flex:1;background:none;border:0;resize:none;max-height:200px;padding:6px 8px;outline:none}
-#send{background:var(--acc);border:0;color:#fff;border-radius:11px;padding:8px 16px;font-weight:600}
-#send[disabled]{opacity:.5}
-dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:16px;padding:20px;width:min(520px,92vw)}
-dialog::backdrop{background:rgba(0,0,0,.6)}
-dialog label{display:block;margin:12px 0 4px;color:var(--mute);font-size:13px}
-dialog input,dialog textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px 10px}
-dialog textarea{min-height:110px;resize:vertical}
-.row{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
-@media(max-width:760px){
- #side{position:fixed;inset:0 auto 0 0;z-index:5;transform:translateX(-100%);transition:transform .2s;padding-top:calc(12px + env(safe-area-inset-top,0px))}
- #side.open{transform:none}
- #menu{display:block}
- #empty h1{font-size:42px}
-}
-@media(prefers-reduced-motion:reduce){#side{transition:none}}
-</style>
-</head>
-<body>
-<aside id="side">
-  <div class="brand">Mark <i>AI</i></div>
-  <button class="btn" id="new">+ Новый чат</button>
-  <div id="list"></div>
-  <button class="btn" id="cfg">Настройки</button>
-</aside>
-<div id="main">
-  <header>
-    <button id="menu" aria-label="Чаты">☰</button>
-    <span id="status"></span>
-  </header>
-  <div id="msgs"><div class="wrap" id="wrap"></div></div>
-  <form id="f">
-    <div class="box">
-      <textarea id="in" rows="1" placeholder="Напиши сообщение для Mark AI" aria-label="Сообщение"></textarea>
-      <button id="send" type="submit">Отправить</button>
-    </div>
-  </form>
-</div>
+// Mark AI — сервер на Cloudflare Workers
+// Переменные (Settings → Variables and Secrets):
+//   GEMINI_API_KEY     — ключ из Google AI Studio (секрет)
+//   ANTHROPIC_API_KEY  — ключ Claude API (секрет, можно не добавлять)
+//   ACCESS_TOKEN       — твой пароль для доступа к серверу (секрет)
+//   GEMINI_MODEL       — необязательно, по умолчанию gemini-2.5-flash
+//   CLAUDE_MODEL       — необязательно, по умолчанию claude-sonnet-5-5
+//   ALLOWED_ORIGIN     — необязательно, например https://твой-ник.github.io
 
-<dialog id="dlg">
-  <h3 style="margin:0">Настройки</h3>
-  <label for="url">Адрес сервера ИИ</label>
-  <input id="url" placeholder="https://mark-ai.твой-ник.workers.dev">
-  <label for="sys">Характер Mark AI (системный промпт)</label>
-  <textarea id="sys"></textarea>
-  <div class="row">
-    <button class="btn" id="cancel" type="button">Отмена</button>
-    <button class="btn" id="save" type="button">Сохранить</button>
-  </div>
-</dialog>
+const cors = (env) => ({
+  "Access-Control-Allow-Origin": env.ALLOWED_ORIGIN || "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, X-Access",
+});
 
-<script>
-const $=s=>document.querySelector(s);
-const DEF_SYS="Ты Mark AI — личный ИИ-помощник. Отвечай на языке пользователя, по делу и дружелюбно. Без необходимости не упоминай, на каких технологиях ты построен. Код оформляй в блоках.";
-let S={chats:[],cur:null,url:"",sys:DEF_SYS,};
-try{Object.assign(S,JSON.parse(localStorage.getItem("markai")||"{}"))}catch(e){}
-const save=()=>{try{localStorage.setItem("markai",JSON.stringify(S))}catch(e){}};
-const WAIT="Mark AI думает…";
-const uid=()=>Math.random().toString(36).slice(2,10);
-let busy=false,ctrl=null;
-
-const esc=t=>t.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
-function md(t){
-  return t.split("```").map((p,i)=>{
-    if(i%2){const nl=p.indexOf("\n");const body=nl<0?"":p.slice(nl+1);
-      return '<div class="code"><button type="button" data-copy>Копировать</button><pre>'+esc(body.replace(/\n$/,""))+'</pre></div>'}
-    return esc(p).replace(/`([^`\n]+)`/g,"<code>$1</code>").replace(/\*\*([^*\n]+)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>");
-  }).join("");
-}
-
-const cur=()=>S.chats.find(c=>c.id===S.cur);
-function newChat(){const c={id:uid(),title:"Новый чат",msgs:[]};S.chats.unshift(c);S.cur=c.id;save();draw();$("#side").classList.remove("open");$("#in").focus()}
-
-function drawList(){
-  $("#list").innerHTML="";
-  S.chats.forEach(c=>{
-    const d=document.createElement("div");d.className="chat"+(c.id===S.cur?" on":"");
-    d.innerHTML="<span></span><b title='Удалить'>✕</b>";d.firstChild.textContent=c.title;
-    d.onclick=()=>{S.cur=c.id;save();draw();$("#side").classList.remove("open")};
-    d.querySelector("b").onclick=e=>{e.stopPropagation();S.chats=S.chats.filter(x=>x.id!==c.id);if(S.cur===c.id)S.cur=S.chats[0]?.id||null;save();draw()};
-    $("#list").appendChild(d);
-  });
-}
-function drawMsgs(){
-  const c=cur(),w=$("#wrap");
-  if(!c||!c.msgs.length){w.innerHTML='<div id="empty"><h1>Mark <i>AI</i></h1><p>Твой личный ИИ. О чём поговорим?</p></div>';return}
-  w.innerHTML="";
-  c.msgs.forEach(m=>{
-    const d=document.createElement("div");d.className="m "+(m.role==="user"?"u":"a");
-    d.innerHTML="<small>"+(m.role==="user"?"Ты":"Mark AI")+'</small><div class="bub"></div>';
-    d.querySelector(".bub").innerHTML=md(m.content||WAIT);
-    w.appendChild(d);
-  });
-  $("#msgs").scrollTop=1e9;
-}
-function draw(){drawList();drawMsgs();
-  $("#status").textContent=S.url?"":"демо-режим: прокси не подключён"}
-
-async function send(text){
-  if(busy||!text.trim())return;
-  if(!cur())newChat();
-  const c=cur();
-  c.msgs.push({role:"user",content:text});
-  if(c.msgs.length===1)c.title=text.slice(0,40);
-  const a={role:"assistant",content:""};c.msgs.push(a);
-  busy=true;$("#send").disabled=true;save();draw();
-  const upd=()=>{const b=$("#wrap").lastElementChild.querySelector(".bub");b.innerHTML=md(a.content||WAIT);$("#msgs").scrollTop=1e9};
-  try{
-    if(!S.url){
-      a.content="Сейчас включён демо-режим: сайт работает, но сервер с ИИ ещё не подключён. Когда он будет готов, я начну отвечать по-настоящему.\n\nТы написал: `"+text.slice(0,80)+"`";
-      for(let i=0;i<a.content.length;i+=6){await new Promise(r=>setTimeout(r,15));upd();}
-    }else{
-      ctrl=new AbortController();
-      const r=await fetch(S.url,{method:"POST",signal:ctrl.signal,headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({mode:"merge",system:S.sys,messages:c.msgs.slice(0,-1).map(({role,content})=>({role,content}))})});
-      if(!r.ok)throw new Error("Прокси ответил "+r.status);
-      const rd=r.body.getReader(),dec=new TextDecoder();
-      for(;;){const{done,value}=await rd.read();if(done)break;a.content+=dec.decode(value,{stream:true});upd()}
+async function askGemini(env, system, messages) {
+  if (!env.GEMINI_API_KEY) throw new Error("no gemini key");
+  const model = env.GEMINI_MODEL || "gemini-2.5-flash";
+  const r = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: system }] },
+        contents: messages.map((m) => ({
+          role: m.role === "assistant" ? "model" : "user",
+          parts: [{ text: m.content }],
+        })),
+      }),
     }
-  }catch(e){
-    if(e.name!=="AbortError")a.content+=(a.content?"\n\n":"")+"Ошибка: "+e.message+". Проверь адрес прокси в настройках.";
-  }
-  busy=false;ctrl=null;$("#send").disabled=false;save();upd();
+  );
+  if (!r.ok) throw new Error("gemini " + r.status + " " + (await r.text()).slice(0, 200));
+  const d = await r.json();
+  const text = (d.candidates?.[0]?.content?.parts || []).map((p) => p.text || "").join("");
+  if (!text) throw new Error("gemini empty");
+  return text;
 }
 
-$("#f").onsubmit=e=>{e.preventDefault();const t=$("#in").value;$("#in").value="";$("#in").style.height="auto";send(t)};
-$("#in").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("#f").requestSubmit()}};
-$("#in").oninput=e=>{e.target.style.height="auto";e.target.style.height=Math.min(e.target.scrollHeight,200)+"px"};
-$("#new").onclick=newChat;
-$("#menu").onclick=()=>$("#side").classList.toggle("open");
-$("#cfg").onclick=()=>{$("#url").value=S.url;$("#sys").value=S.sys;$("#dlg").showModal()};
-$("#cancel").onclick=()=>$("#dlg").close();
-$("#save").onclick=()=>{S.url=$("#url").value.trim();S.sys=$("#sys").value.trim()||DEF_SYS;save();$("#dlg").close();draw()};
-$("#wrap").onclick=e=>{const b=e.target.closest("[data-copy]");if(b){navigator.clipboard.writeText(b.nextElementSibling.textContent);b.textContent="Скопировано";setTimeout(()=>b.textContent="Копировать",1200)}};
-draw();
-</script>
-</body>
-</html>
+async function askClaude(env, system, messages) {
+  if (!env.ANTHROPIC_API_KEY) throw new Error("no claude key");
+  const r = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": env.ANTHROPIC_API_KEY,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: env.CLAUDE_MODEL || "claude-sonnet-5-5",
+      max_tokens: 2048,
+      system,
+      messages: messages.map((m) => ({ role: m.role, content: m.content })),
+    }),
+  });
+  if (!r.ok) throw new Error("claude " + r.status + " " + (await r.text()).slice(0, 200));
+  const d = await r.json();
+  const text = (d.content || []).map((p) => p.text || "").join("");
+  if (!text) throw new Error("claude empty");
+  return text;
+}
+
+export default {
+  async fetch(req, env) {
+    const h = cors(env);
+    if (req.method === "OPTIONS") return new Response(null, { headers: h });
+    if (req.method !== "POST") return new Response("Mark AI server", { headers: h });
+    if (env.ACCESS_TOKEN && req.headers.get("X-Access") !== env.ACCESS_TOKEN)
+      return new Response("Неверный ключ доступа", { status: 401, headers: h });
+
+    let body;
+    try { body = await req.json(); } catch { return new Response("Bad request", { status: 400, headers: h }); }
+    const system = body.system || "Ты Mark AI — личный ИИ-помощник.";
+    const messages = Array.isArray(body.messages) ? body.messages.slice(-30) : [];
+    if (!messages.length) return new Response("Пустой запрос", { status: 400, headers: h });
+
+    // Спрашиваем обе модели одновременно
+    const [g, c] = await Promise.allSettled([
+      askGemini(env, system, messages),
+      askClaude(env, system, messages),
+    ]);
+    const drafts = [g, c].filter((x) => x.status === "fulfilled").map((x) => x.value);
+
+    let answer;
+    if (drafts.length === 0) {
+      const why = [g, c].map((x) => x.reason && x.reason.message).filter(Boolean).join(" | ");
+      return new Response("Не удалось получить ответ. Причины: " + why, { status: 502, headers: h });
+    } else if (drafts.length === 1) {
+      answer = drafts[0];
+    } else {
+      // Склеиваем два ответа в один
+      const question = messages[messages.length - 1].content;
+      const prompt =
+        `Вопрос пользователя:\n${question}\n\n` +
+        `Черновик 1:\n${drafts[0]}\n\nЧерновик 2:\n${drafts[1]}\n\n` +
+        `Объедини черновики в один лучший ответ: сохрани всё верное и полезное, убери повторы, ` +
+        `при расхождениях выбери более точный вариант. Пиши на языке пользователя. ` +
+        `Не упоминай, что были черновики или несколько источников. Выдай только готовый ответ.`;
+      try {
+        answer = await askGemini(env, system, [{ role: "user", content: prompt }]);
+      } catch {
+        answer = drafts[0];
+      }
+    }
+    return new Response(answer, { headers: { ...h, "Content-Type": "text/plain; charset=utf-8" } });
+  },
+};
