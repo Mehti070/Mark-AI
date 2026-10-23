@@ -55,7 +55,7 @@ dialog input,dialog textarea{width:100%;background:var(--bg);border:1px solid va
 dialog textarea{min-height:110px;resize:vertical}
 .row{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
 .tag{color:var(--acc);background:#222a52;border-radius:6px;padding:0 4px}
-#tg{display:none;position:absolute;left:0;right:0;bottom:calc(100% + 6px);background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+#tg{display:none;z-index:6;position:absolute;left:0;right:0;bottom:calc(100% + 6px);background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.4)}
 #tg .it{display:flex;gap:10px;align-items:baseline;padding:7px 12px;cursor:pointer}
 #tg .it.on,#tg .it:hover{background:#222a52}
 #tg b{color:var(--acc);font-weight:600;flex:none}
@@ -93,9 +93,7 @@ dialog textarea{min-height:110px;resize:vertical}
 
 <dialog id="dlg">
   <h3 style="margin:0">Настройки</h3>
-  <label for="url">Адрес сервера ИИ</label>
-  <input id="url" placeholder="https://mark-ai.твой-ник.workers.dev">
-  <label for="tok">Ключ доступа</label>
+  <label for="tok">Ключ доступа (вводится один раз)</label>
   <input id="tok" type="password" autocomplete="off">
   <label for="sys">Характер Mark AI (системный промпт)</label>
   <textarea id="sys"></textarea>
@@ -110,6 +108,7 @@ const $=s=>document.querySelector(s);
 const DEF_SYS="Ты Mark AI — личный ИИ-помощник. Отвечай на языке пользователя, по делу и дружелюбно. Без необходимости не упоминай, на каких технологиях ты построен. Код оформляй в блоках.";
 let S={chats:[],cur:null,url:"",sys:DEF_SYS,};
 try{Object.assign(S,JSON.parse(localStorage.getItem("markai")||"{}"))}catch(e){}
+S.url="https://lingering-leaf-cd4f.mehtiagazade07.workers.dev/";
 const save=()=>{try{localStorage.setItem("markai",JSON.stringify(S))}catch(e){}};
 const WAIT="Mark AI думает…";
 const uid=()=>Math.random().toString(36).slice(2,10);
@@ -188,13 +187,14 @@ $("#in").onkeydown=e=>{if(cand.length){if(e.key==="ArrowDown"||e.key==="ArrowUp"
 $("#in").oninput=e=>{hint();e.target.style.height="auto";e.target.style.height=Math.min(e.target.scrollHeight,200)+"px"};
 $("#new").onclick=newChat;
 $("#menu").onclick=()=>$("#side").classList.toggle("open");
-$("#cfg").onclick=()=>{$("#url").value=S.url;$("#tok").value=S.token||"";$("#sys").value=S.sys;$("#dlg").showModal()};
+$("#cfg").onclick=()=>{$("#tok").value=S.token||"";$("#sys").value=S.sys;$("#dlg").showModal()};
 $("#cancel").onclick=()=>$("#dlg").close();
-$("#save").onclick=()=>{S.url=$("#url").value.trim();S.token=$("#tok").value.trim();S.sys=$("#sys").value.trim()||DEF_SYS;save();$("#dlg").close();draw();loadTags()};
+$("#save").onclick=()=>{S.token=$("#tok").value.trim();S.sys=$("#sys").value.trim()||DEF_SYS;save();$("#dlg").close();draw();loadTags()};
 $("#wrap").onclick=e=>{const b=e.target.closest("[data-copy]");if(b){navigator.clipboard.writeText(b.nextElementSibling.textContent);b.textContent="Скопировано";setTimeout(()=>b.textContent="Копировать",1200)}};
 let TAGS={},sel=0,cand=[];
 const nrm=s=>s.toLowerCase().replace(/ё/g,"е");
-async function loadTags(){TAGS={};if(!S.url)return;try{const u=new URL(S.url);u.searchParams.set("tags","1");const r=await fetch(u);if(r.ok)TAGS=await r.json()}catch(e){}}
+const NAMES="кратко подробно обширно максимальноподробно развернуто сжато пошагово безводы толькоответ многоинформации качественно точно профессионально проверенно логично реалистично оригинально эффективно безповторов красиво современно минималистично подробноеоформление структурированно таблица список сэмодзи безэмодзи читабельно адаптивно многофункций анимации интерактивно премиумдизайн удобно быстраязагрузка полныйсайт готовыйкод беззаглушек уникальныйдизайн темнаятема светлаятема напишикод оптимизированно чистыйкод комментариивкоде соблюдайстандарт беззависимостей тесты исправьошибки объясникод полныйпроект безпсевдокода безопасныйкод простымиязыком дляновичка дляэксперта спримерами сравнениями углубленно теорияипрактика проверьпонимание безсложныхслов научно многоидей оригинальнаяидея необычно креативно реализуемо подробнаяконцепция многофункционально названия безклише сразвитием проанализируй сравни плюсыиминусы критично риски аргументы факты альтернативы практическийрезультат сравнисдеталями грамотно официально неформально убедительно естественно безканцелярита перепиши улучши сохранисмысл несокращай толькобесплатное безустановки безрегистрации актуально систочниками покажипримеры строгопозапросу безлишнего учтиограничения несоглашайсяавтоматически".split(" ");
+async function loadTags(){TAGS={};try{const u=new URL(S.url);u.searchParams.set("tags","1");const r=await fetch(u);TAGS=await r.json();if(!Object.keys(TAGS).length)throw 0}catch(e){TAGS={};NAMES.forEach(k=>TAGS[k]="")}}
 function hint(){const el=$("#in"),m=el.value.slice(0,el.selectionStart).match(/(^|\s)#([\p{L}\p{N}_]*)$/u);cand=[];
  if(m){const q=nrm(m[2]);cand=Object.keys(TAGS).filter(k=>nrm(k).startsWith(q)).slice(0,8)}
  sel=0;showHint()}
