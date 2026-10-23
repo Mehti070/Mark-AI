@@ -44,7 +44,7 @@ header{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:
 #empty h1 i{font-style:normal;color:var(--acc)}
 #empty p{margin:0}
 form{padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px))}
-.box{max-width:760px;margin:0 auto;display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:8px}
+.box{position:relative;max-width:760px;margin:0 auto;display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:8px}
 textarea{flex:1;background:none;border:0;resize:none;max-height:200px;padding:6px 8px;outline:none}
 #send{background:var(--acc);border:0;color:#fff;border-radius:11px;padding:8px 16px;font-weight:600}
 #send[disabled]{opacity:.5}
@@ -54,6 +54,12 @@ dialog label{display:block;margin:12px 0 4px;color:var(--mute);font-size:13px}
 dialog input,dialog textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px 10px}
 dialog textarea{min-height:110px;resize:vertical}
 .row{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.tag{color:var(--acc);background:#222a52;border-radius:6px;padding:0 4px}
+#tg{display:none;position:absolute;left:0;right:0;bottom:calc(100% + 6px);background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+#tg .it{display:flex;gap:10px;align-items:baseline;padding:7px 12px;cursor:pointer}
+#tg .it.on,#tg .it:hover{background:#222a52}
+#tg b{color:var(--acc);font-weight:600;flex:none}
+#tg small{color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:760px){
  #side{position:fixed;inset:0 auto 0 0;z-index:5;transform:translateX(-100%);transition:transform .2s;padding-top:calc(12px + env(safe-area-inset-top,0px))}
  #side.open{transform:none}
@@ -78,6 +84,7 @@ dialog textarea{min-height:110px;resize:vertical}
   <div id="msgs"><div class="wrap" id="wrap"></div></div>
   <form id="f">
     <div class="box">
+      <div id="tg" role="listbox"></div>
       <textarea id="in" rows="1" placeholder="Напиши сообщение для Mark AI" aria-label="Сообщение"></textarea>
       <button id="send" type="submit">Отправить</button>
     </div>
@@ -109,11 +116,12 @@ const uid=()=>Math.random().toString(36).slice(2,10);
 let busy=false,ctrl=null;
 
 const esc=t=>t.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
-function md(t){
+const TAGRE=/(^|\s)#(\p{L}[\p{L}\p{N}_]*)/gu;
+function md(t,u){
   return t.split("```").map((p,i)=>{
     if(i%2){const nl=p.indexOf("\n");const body=nl<0?"":p.slice(nl+1);
       return '<div class="code"><button type="button" data-copy>Копировать</button><pre>'+esc(body.replace(/\n$/,""))+'</pre></div>'}
-    return esc(p).replace(/`([^`\n]+)`/g,"<code>$1</code>").replace(/\*\*([^*\n]+)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>");
+    return (u?esc(p).replace(TAGRE,'$1<span class="tag">#$2</span>'):esc(p)).replace(/`([^`\n]+)`/g,"<code>$1</code>").replace(/\*\*([^*\n]+)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>");
   }).join("");
 }
 
@@ -137,7 +145,7 @@ function drawMsgs(){
   c.msgs.forEach(m=>{
     const d=document.createElement("div");d.className="m "+(m.role==="user"?"u":"a");
     d.innerHTML="<small>"+(m.role==="user"?"Ты":"Mark AI")+'</small><div class="bub"></div>';
-    d.querySelector(".bub").innerHTML=md(m.content||WAIT);
+    d.querySelector(".bub").innerHTML=md(m.content||WAIT,m.role==="user");
     w.appendChild(d);
   });
   $("#msgs").scrollTop=1e9;
@@ -172,16 +180,28 @@ async function send(text){
   busy=false;ctrl=null;$("#send").disabled=false;save();upd();
 }
 
-$("#f").onsubmit=e=>{e.preventDefault();const t=$("#in").value;$("#in").value="";$("#in").style.height="auto";send(t)};
-$("#in").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("#f").requestSubmit()}};
-$("#in").oninput=e=>{e.target.style.height="auto";e.target.style.height=Math.min(e.target.scrollHeight,200)+"px"};
+$("#f").onsubmit=e=>{e.preventDefault();const t=$("#in").value;cand=[];showHint();$("#in").value="";$("#in").style.height="auto";send(t)};
+$("#in").onkeydown=e=>{if(cand.length){if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();sel=(sel+(e.key==="ArrowDown"?1:-1)+cand.length)%cand.length;showHint();return}
+ if(e.key==="Tab"||e.key==="Enter"){e.preventDefault();pickTag(cand[sel]);return}
+ if(e.key==="Escape"){cand=[];showHint();return}}
+ if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("#f").requestSubmit()}};
+$("#in").oninput=e=>{hint();e.target.style.height="auto";e.target.style.height=Math.min(e.target.scrollHeight,200)+"px"};
 $("#new").onclick=newChat;
 $("#menu").onclick=()=>$("#side").classList.toggle("open");
 $("#cfg").onclick=()=>{$("#url").value=S.url;$("#tok").value=S.token||"";$("#sys").value=S.sys;$("#dlg").showModal()};
 $("#cancel").onclick=()=>$("#dlg").close();
-$("#save").onclick=()=>{S.url=$("#url").value.trim();S.token=$("#tok").value.trim();S.sys=$("#sys").value.trim()||DEF_SYS;save();$("#dlg").close();draw()};
+$("#save").onclick=()=>{S.url=$("#url").value.trim();S.token=$("#tok").value.trim();S.sys=$("#sys").value.trim()||DEF_SYS;save();$("#dlg").close();draw();loadTags()};
 $("#wrap").onclick=e=>{const b=e.target.closest("[data-copy]");if(b){navigator.clipboard.writeText(b.nextElementSibling.textContent);b.textContent="Скопировано";setTimeout(()=>b.textContent="Копировать",1200)}};
-draw();
+let TAGS={},sel=0,cand=[];
+const nrm=s=>s.toLowerCase().replace(/ё/g,"е");
+async function loadTags(){TAGS={};if(!S.url)return;try{const u=new URL(S.url);u.searchParams.set("tags","1");const r=await fetch(u);if(r.ok)TAGS=await r.json()}catch(e){}}
+function hint(){const el=$("#in"),m=el.value.slice(0,el.selectionStart).match(/(^|\s)#([\p{L}\p{N}_]*)$/u);cand=[];
+ if(m){const q=nrm(m[2]);cand=Object.keys(TAGS).filter(k=>nrm(k).startsWith(q)).slice(0,8)}
+ sel=0;showHint()}
+function showHint(){const t=$("#tg");if(!cand.length){t.style.display="none";return}
+ t.innerHTML="";cand.forEach((k,i)=>{const d=document.createElement("div");d.className="it"+(i===sel?" on":"");d.innerHTML="<b></b><small></small>";d.firstChild.textContent="#"+k;d.lastChild.textContent=TAGS[k];d.onmousedown=e=>{e.preventDefault();pickTag(k)};t.appendChild(d)});t.style.display="block"}
+function pickTag(k){const el=$("#in"),pos=el.selectionStart,b=el.value.slice(0,pos).replace(/#([\p{L}\p{N}_]*)$/u,"#"+k+" ");el.value=b+el.value.slice(pos);el.selectionStart=el.selectionEnd=b.length;cand=[];showHint();el.focus()}
+draw();loadTags();
 </script>
 </body>
 </html>
