@@ -226,9 +226,10 @@ async function token(){if(!SES)return"";if(Date.now()/1000>SES.expires_at){try{s
 const hdr=async()=>SB?{"Content-Type":"application/json",Authorization:"Bearer "+await token()}:{"Content-Type":"application/json","X-Access":S.token||""};
 let pt;function push(){if(!SB||!SES)return;clearTimeout(pt);pt=setTimeout(async()=>{try{await fetch(SB_URL+"/rest/v1/user_data?on_conflict=user_id",{method:"POST",headers:{...sbh(await token()),Prefer:"resolution=merge-duplicates"},body:JSON.stringify({user_id:SES.user.id,data:snap(),updated_at:new Date().toISOString()})})}catch(e){}},1500)}
 function save(){try{localStorage.setItem(KEY(),JSON.stringify(S,repl))}catch(e){}push()}
-function loadLocal(){S=blank();try{const raw=localStorage.getItem(KEY())||(!SB?localStorage.getItem("markai"):null);Object.assign(S,JSON.parse(raw||"{}"))}catch(e){}if(!["chat","list","proj","acc"].includes(S.view))S.view="chat"}
+function heal(){S.chats.forEach(c=>c.msgs.forEach(m=>{if(m.role==="assistant"&&typeof m.content==="string"&&m.content.startsWith('{"t":"')){let t="",e="";m.content.split("\n").forEach(l=>{try{const o=JSON.parse(l);if(o.t==="text")t+=o.d;else if(o.t==="error")e=o.m}catch(x){}});m.content=t||(e?L("err")+": "+e:"…")}}))}
+function loadLocal(){S=blank();try{const raw=localStorage.getItem(KEY())||(!SB?localStorage.getItem("markai"):null);Object.assign(S,JSON.parse(raw||"{}"))}catch(e){}if(!["chat","list","proj","acc"].includes(S.view))S.view="chat";heal()}
 async function boot(){loadLocal();render();loadTags();
-  if(SB&&SES){await refreshUser();try{const r=await fetch(SB_URL+"/rest/v1/user_data?select=data&user_id=eq."+SES.user.id,{headers:sbh(await token())});const j=await r.json();const d=j[0]&&j[0].data;if(d&&d.chats){Object.assign(S,d);if(!cur())S.cur=null;render();try{localStorage.setItem(KEY(),JSON.stringify(S,repl))}catch(e){}}}catch(e){}}}
+  if(SB&&SES){await refreshUser();try{const r=await fetch(SB_URL+"/rest/v1/user_data?select=data&user_id=eq."+SES.user.id,{headers:sbh(await token())});const j=await r.json();const d=j[0]&&j[0].data;if(d&&d.chats){Object.assign(S,d);heal();if(!cur())S.cur=null;render();try{localStorage.setItem(KEY(),JSON.stringify(S,repl))}catch(e){}}}catch(e){}}}
 let signup=false;
 function authMode(){$("#aTitle").textContent=L(signup?"signup":"login");$("#aGo").textContent=L(signup?"signup":"login");$("#aSw").textContent=L(signup?"or2":"or1");$("#aMail").placeholder=L("email");$("#aPass").placeholder=L("pass");$("#aG").textContent=L("withg")}
 function showAuth(){S=S||blank();$("#auth").hidden=false;authMode()}
@@ -417,8 +418,9 @@ async function send(text){
         else if(o.t==="text"){if(a.thinking){closeS();a.thinking=false;T.ms=Date.now()-t0;clearInterval(tick)}a.content+=o.d}
         else if(o.t==="error")fail=o.m;
         upd()};
-      const nd=(r.headers.get("content-type")||"").includes("ndjson"),rd=r.body.getReader(),dec=new TextDecoder();let buf="";
+      let nd=(r.headers.get("content-type")||"").includes("ndjson"),first=true;const rd=r.body.getReader(),dec=new TextDecoder();let buf="";
       for(;;){const{done,value}=await rd.read();if(done)break;const ch=dec.decode(value,{stream:true});
+        if(first){first=false;if(ch.trimStart().startsWith('{"t":'))nd=true}
         if(!nd){ev({t:"text",d:ch});continue}
         buf+=ch;let i;while((i=buf.indexOf("\n"))>=0){const ln=buf.slice(0,i);buf=buf.slice(i+1);if(ln.trim()){try{ev(JSON.parse(ln))}catch(e){}}}}
       if(fail)throw new Error(fail);
