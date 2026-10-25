@@ -41,7 +41,7 @@ header{display:flex;align-items:center;gap:8px;padding:10px 14px}
 #status{margin-left:auto;color:var(--mute);font-size:13px}
 #msgs{flex:1;overflow:auto;padding:8px 16px}
 #pview{flex:1;overflow:auto;padding:8px 16px 16px}
-#main[data-v=chat] #pview,#main[data-v=proj] #msgs,#main[data-v=list] #msgs,#main[data-v=list] #comp{display:none}
+#main[data-v=chat] #pview,#main[data-v=proj] #msgs,#main[data-v=list] #msgs,#main[data-v=list] #comp,#main[data-v=acc] #msgs,#main[data-v=acc] #comp{display:none}
 #main.empty #msgs{flex:none;overflow:visible}
 #main.empty header{margin-bottom:auto}
 #main.empty #comp{margin-bottom:auto}
@@ -49,7 +49,7 @@ header{display:flex;align-items:center;gap:8px;padding:10px 14px}
 .pg{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
 .pg h2{margin:0;font:400 28px Georgia,serif}
 .pg label{color:var(--mute);font-size:13px;margin-top:10px}
-.pg input,.pg textarea,dialog input,dialog textarea,dialog select{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.pg input,.pg textarea,.pg select,dialog input,dialog textarea,dialog select{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
 .pn{font:400 26px Georgia,serif!important;border:0!important;background:none!important;padding:4px 0!important}
 .rowh{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
@@ -109,6 +109,25 @@ dialog textarea{min-height:110px;resize:vertical}
 .acard h2{margin:0 0 6px;font:400 26px Georgia,serif}
 #authErr{color:#d14b4b;font-size:13px;min-height:18px}
 .lnk{background:none;border:0;color:var(--acc);padding:4px}
+.sec{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.sec h3{margin:0;font-size:15px}
+.sec small{color:var(--mute)}
+.who2{display:flex;align-items:center;gap:12px}
+.who2>div:last-child{flex:1}
+.av.big{width:52px;height:52px;font-size:22px}
+.pg input.nm{font:400 20px Georgia,serif;border:0;background:none;padding:2px 0}
+.acts{flex-wrap:wrap}
+.bub a{color:var(--acc)}
+.think{margin:0 0 10px;font-size:14px;color:var(--mute)}
+.think summary{cursor:pointer;user-select:none;padding:2px 0}
+.tl{border-left:2px solid var(--line);margin:6px 0 2px 4px;padding-left:12px;display:flex;flex-direction:column;gap:8px}
+.st b{font-weight:500;color:var(--text)}
+.st .sd{white-space:pre-wrap;font-size:13px;margin-top:2px}
+.think blockquote{margin:2px 0 0;padding:0;white-space:pre-wrap;font-size:13px;font-style:italic}
+.tm{font-size:13px;color:var(--mute);margin-bottom:4px}
+.fb{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-top:2px}
+.fb .ic{padding:2px 8px;font-size:14px}.fb .ic.on{background:var(--acc2);color:var(--text)}
+.memchip{font-size:12px;color:var(--mute);background:var(--acc2);border-radius:10px;padding:2px 4px 2px 10px}
 @media(max-width:760px){
  #side{position:fixed;inset:0 auto 0 0;z-index:5;margin:0!important;transform:translateX(-100%);transition:transform .2s;padding-top:calc(12px + env(safe-area-inset-top,0px))}
  #side.open{transform:none;box-shadow:0 0 40px rgba(0,0,0,.35)}
@@ -139,6 +158,7 @@ dialog textarea{min-height:110px;resize:vertical}
       <div class="tools">
         <button id="att" class="ic" type="button">📎</button><input type="file" id="fi" multiple hidden accept="image/*,.pdf,.txt,.md,.json,.csv,.js,.ts,.py,.html,.css,.java,.c,.cpp,.cs,.lua,.luau,.xml,.yml,.yaml,.log">
         <button id="imgb" class="ic" type="button">🖼</button>
+        <button id="agb" class="ic" type="button">🤖</button>
         <button id="send" type="submit" aria-label="Send">↑</button>
       </div>
     </div>
@@ -154,24 +174,11 @@ dialog textarea{min-height:110px;resize:vertical}
     <input id="aPass" type="password" autocomplete="current-password" minlength="6" required>
     <div id="authErr"></div>
     <button class="btn pri" id="aGo" type="submit"></button>
+    <button class="btn" id="aG" type="button"></button>
     <button class="lnk" id="aSw" type="button"></button>
   </form>
 </div>
 
-<dialog id="dlg">
-  <h3 style="margin:0" data-i="cfgTitle">Настройки</h3>
-  <label for="lang" data-i="lang">Язык</label>
-  <select id="lang"><option value="auto">Auto</option><option value="ru">Русский</option><option value="en">English</option><option value="az">Azərbaycanca</option><option value="tr">Türkçe</option><option value="de">Deutsch</option></select>
-  <label for="theme" data-i="theme">Тема</label>
-  <select id="theme"><option value="auto" data-i="tAuto">Авто</option><option value="light" data-i="tLight">Светлая</option><option value="dark" data-i="tDark">Тёмная</option></select>
-  <label for="sys" data-i="sys">Характер Mark AI</label>
-  <textarea id="sys"></textarea>
-  <div id="tokw"><label for="tok" data-i="tok">Ключ доступа</label><input id="tok" type="password" autocomplete="off"></div>
-  <div class="row">
-    <button class="btn" id="cancel" type="button" data-i="cancel">Отмена</button>
-    <button class="btn pri" id="save" type="button" data-i="save">Сохранить</button>
-  </div>
-</dialog>
 <dialog id="pv">
   <header><b data-i="prev">Предпросмотр</b><span style="flex:1"></span><button class="sm" id="pvDl" data-i="dl">Скачать</button><button class="sm" id="pvX" data-i="close">Закрыть</button></header>
   <iframe id="pvf" sandbox="allow-scripts allow-forms allow-popups allow-modals" title="preview"></iframe>
@@ -189,9 +196,9 @@ const DEF_SYS="Ты Mark AI — личный ИИ-помощник. Отвеча
 let S,SES=null;
 try{SES=JSON.parse(localStorage.getItem("markai_ses")||"null")}catch(e){}
 const KEY=()=>"markai:"+(SES?SES.user.id:"guest");
-const blank=()=>({chats:[],projects:[],cur:null,vp:null,view:"chat",sys:DEF_SYS,lang:"auto",theme:"auto",token:""});
-const repl=(k,v)=>k==="img"?undefined:k==="att"&&Array.isArray(v)?v.map(f=>({name:f.name,kind:f.kind})):v;
-const snap=()=>JSON.parse(JSON.stringify({chats:S.chats,projects:S.projects,sys:S.sys,lang:S.lang,theme:S.theme},repl));
+const blank=()=>({chats:[],projects:[],cur:null,vp:null,view:"chat",sys:DEF_SYS,lang:"auto",theme:"auto",token:"",name:"",memory:"",think:"auto",web:"auto",automem:"on"});
+const repl=(k,v)=>k==="img"||k==="live"||k==="thinking"?undefined:k==="att"&&Array.isArray(v)?v.map(f=>({name:f.name,kind:f.kind})):v;
+const snap=()=>JSON.parse(JSON.stringify({chats:S.chats,projects:S.projects,sys:S.sys,lang:S.lang,theme:S.theme,name:S.name,memory:S.memory,think:S.think,web:S.web,automem:S.automem},repl));
 const uid=()=>Math.random().toString(36).slice(2,10);
 
 /* ===== Язык интерфейса (новые строки есть на ru/en, остальные языки берут русский) ===== */
@@ -205,7 +212,11 @@ tr:{new:"Yeni sohbet",send:"Gönder",tag:"Kişisel yapay zekan. Ne hakkında kon
 de:{new:"Neuer Chat",send:"Senden",tag:"Deine persönliche KI. Worüber sprechen wir?",wait:"Mark AI denkt nach…",cfgTitle:"Einstellungen",lang:"Sprache",sys:"Charakter von Mark AI (Systemprompt)",tok:"Zugangsschlüssel (einmalig)",cancel:"Abbrechen",save:"Speichern",copy:"Kopieren",copied:"Kopiert",prev:"Vorschau",close:"Schließen",dl:"Herunterladen",you:"Du",err:"Fehler",chk:"Prüfe die Einstellungen.",newchat:"Neuer Chat",imgt:"Bildmodus: beschreibe, was gezeichnet werden soll",imgwait:"Mark AI zeichnet…",imggone:"Das Bild wird nach dem Neuladen nicht gespeichert",ph:"Nachricht an Mark AI",badfile:"Anhängen fehlgeschlagen"}};
 const LANG=()=>I[S&&S.lang]?S.lang:"ru";
 const L=k=>I[LANG()][k]||I.ru[k];
-let imgMode=false,NP=null,busy=false,ctrl=null,pend=[],PV="";
+Object.assign(I.ru,{account:"Личный кабинет",profile:"Профиль",yname:"Как к тебе обращаться",signin:"Способы входа",linked:"подключено",linkg:"Привязать Google",pwd:"Пароль",newpass:"Новый пароль (от 6 символов)",setpass:"Сменить пароль",passok:"Пароль изменён",think:"Режим мышления",deep:"Глубокий (умнее, но медленнее)",fast:"Быстрый",web:"Поиск в интернете",won:"Всегда",woff:"Выключен",mem:"Память",memh:"Что Mark AI должен помнить о тебе (учитывается во всех чатах)",data:"Данные",export:"Скачать мои чаты",clearall:"Удалить все чаты",clearq:"Удалить все чаты?",withg:"Войти через Google"});
+Object.assign(I.ru,{thinking:"Думаю…",thought:"Думал",sec:"с",fbwhy:"Что не так? (необязательно)",remembered:"Запомнил",undo:"отменить",agt:"Агентный режим: план → поиск и код → проверка",agent:"Агент (план, поиск, код, проверка)",automem:"Автопамять",dset:"Скачать набор данных (JSONL)",rated:"Оценок"});
+Object.assign(I.en,{thinking:"Thinking…",thought:"Thought for",sec:"s",fbwhy:"What was wrong? (optional)",remembered:"Remembered",undo:"undo",agt:"Agent mode: plan → search & code → verify",agent:"Agent (plan, search, code, verify)",automem:"Auto memory",dset:"Download dataset (JSONL)",rated:"Ratings"});
+Object.assign(I.en,{account:"Account",profile:"Profile",yname:"What should I call you",signin:"Sign-in methods",linked:"connected",linkg:"Link Google",pwd:"Password",newpass:"New password (6+ characters)",setpass:"Change password",passok:"Password changed",think:"Thinking mode",deep:"Deep (smarter, slower)",fast:"Fast",web:"Web search",won:"Always",woff:"Off",mem:"Memory",memh:"What Mark AI should remember about you (used in all chats)",data:"Data",export:"Export my chats",clearall:"Delete all chats",clearq:"Delete all chats?",withg:"Continue with Google"});
+let imgMode=false,agentMode=false,tick=null,NP=null,busy=false,ctrl=null,pend=[],PV="";
 
 /* ===== Supabase (регистрация и синхронизация) ===== */
 const sbh=t=>{const h={apikey:SB_KEY,"Content-Type":"application/json"};if(t)h.Authorization="Bearer "+t;return h};
@@ -215,11 +226,11 @@ async function token(){if(!SES)return"";if(Date.now()/1000>SES.expires_at){try{s
 const hdr=async()=>SB?{"Content-Type":"application/json",Authorization:"Bearer "+await token()}:{"Content-Type":"application/json","X-Access":S.token||""};
 let pt;function push(){if(!SB||!SES)return;clearTimeout(pt);pt=setTimeout(async()=>{try{await fetch(SB_URL+"/rest/v1/user_data?on_conflict=user_id",{method:"POST",headers:{...sbh(await token()),Prefer:"resolution=merge-duplicates"},body:JSON.stringify({user_id:SES.user.id,data:snap(),updated_at:new Date().toISOString()})})}catch(e){}},1500)}
 function save(){try{localStorage.setItem(KEY(),JSON.stringify(S,repl))}catch(e){}push()}
-function loadLocal(){S=blank();try{const raw=localStorage.getItem(KEY())||(!SB?localStorage.getItem("markai"):null);Object.assign(S,JSON.parse(raw||"{}"))}catch(e){}if(!["chat","list","proj"].includes(S.view))S.view="chat"}
+function loadLocal(){S=blank();try{const raw=localStorage.getItem(KEY())||(!SB?localStorage.getItem("markai"):null);Object.assign(S,JSON.parse(raw||"{}"))}catch(e){}if(!["chat","list","proj","acc"].includes(S.view))S.view="chat"}
 async function boot(){loadLocal();render();loadTags();
-  if(SB&&SES){try{const r=await fetch(SB_URL+"/rest/v1/user_data?select=data&user_id=eq."+SES.user.id,{headers:sbh(await token())});const j=await r.json();const d=j[0]&&j[0].data;if(d&&d.chats){Object.assign(S,d);if(!cur())S.cur=null;render();try{localStorage.setItem(KEY(),JSON.stringify(S,repl))}catch(e){}}}catch(e){}}}
+  if(SB&&SES){await refreshUser();try{const r=await fetch(SB_URL+"/rest/v1/user_data?select=data&user_id=eq."+SES.user.id,{headers:sbh(await token())});const j=await r.json();const d=j[0]&&j[0].data;if(d&&d.chats){Object.assign(S,d);if(!cur())S.cur=null;render();try{localStorage.setItem(KEY(),JSON.stringify(S,repl))}catch(e){}}}catch(e){}}}
 let signup=false;
-function authMode(){$("#aTitle").textContent=L(signup?"signup":"login");$("#aGo").textContent=L(signup?"signup":"login");$("#aSw").textContent=L(signup?"or2":"or1");$("#aMail").placeholder=L("email");$("#aPass").placeholder=L("pass")}
+function authMode(){$("#aTitle").textContent=L(signup?"signup":"login");$("#aGo").textContent=L(signup?"signup":"login");$("#aSw").textContent=L(signup?"or2":"or1");$("#aMail").placeholder=L("email");$("#aPass").placeholder=L("pass");$("#aG").textContent=L("withg")}
 function showAuth(){S=S||blank();$("#auth").hidden=false;authMode()}
 $("#aSw").onclick=()=>{signup=!signup;authMode()};
 $("#aform").onsubmit=async e=>{e.preventDefault();$("#authErr").textContent="";const email=$("#aMail").value.trim(),password=$("#aPass").value;
@@ -231,7 +242,7 @@ $("#out").onclick=()=>{setSes(null);S=blank();pend=[];showAuth();render()};
 /* ===== Разметка ===== */
 const esc=t=>t.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 const TAGRE=/(^|\s)#(\p{L}[\p{L}\p{N}_]*)/gu;
-const inl=x=>x.replace(/`([^`\n]+)`/g,"<code>$1</code>").replace(/\*\*([^*\n]+)\*\*/g,"<b>$1</b>");
+const inl=x=>x.replace(/`([^`\n]+)`/g,"<code>$1</code>").replace(/\*\*([^*\n]+)\*\*/g,"<b>$1</b>").replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g,(m,t,u)=>'<a href="'+u.replace(/"/g,"%22")+'" target="_blank" rel="noopener noreferrer">'+t+"</a>");
 function blocks(p){let o="",l=null,m;const cl=()=>{if(l){o+="</"+l+">";l=null}};
   for(const ln of p.split("\n")){
     if(m=ln.match(/^(#{1,4})\s+(.*)/)){cl();const n=Math.min(m[1].length+1,5);o+="<h"+n+">"+inl(esc(m[2]))+"</h"+n+">"}
@@ -251,7 +262,7 @@ const attHtml=a=>'<div>'+a.map(f=>f.url?'<img class="th" alt="" src="'+f.url+'">
 /* ===== Отрисовка ===== */
 const cur=()=>S.chats.find(c=>c.id===S.cur);
 const proj=id=>S.projects.find(p=>p.id===id);
-function applyLang(){document.documentElement.lang=LANG();document.querySelectorAll("[data-i]").forEach(e=>e.textContent=L(e.dataset.i));$("#in").placeholder=L(imgMode?"imgt":S&&S.view==="proj"?"phproj":"ph");$("#imgb").title=L("imgt");$("#send").title=L("send");$("#out").title=L("out");$("#out").style.display=SB?"":"none"}
+function applyLang(){document.documentElement.lang=LANG();document.querySelectorAll("[data-i]").forEach(e=>e.textContent=L(e.dataset.i));$("#in").placeholder=L(imgMode?"imgt":S&&S.view==="proj"?"phproj":"ph");$("#imgb").title=L("imgt");$("#agb").title=L("agt");$("#send").title=L("send");$("#out").title=L("out");$("#out").style.display=SB?"":"none"}
 function applyTheme(){const t=S.theme==="auto"?(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"):S.theme;document.documentElement.dataset.theme=t}
 function setView(v,pid){S.view=v;if(pid!==undefined)S.vp=pid;if(v==="chat")NP=null;save();render();$("#side").classList.remove("open")}
 function newChat(pid){S.cur=null;NP=pid||null;S.view="chat";render();$("#side").classList.remove("open");$("#in").focus()}
@@ -262,22 +273,43 @@ function drawList(){const l=$("#list");l.innerHTML="";
     d.onclick=()=>{S.cur=c.id;setView("chat")};
     d.querySelector("b").onclick=e=>{e.stopPropagation();S.chats=S.chats.filter(x=>x.id!==c.id);if(S.cur===c.id)S.cur=null;save();render()};
     l.appendChild(d)});
-  $("#nProj").classList.toggle("on",S.view!=="chat");
-  $("#who").textContent=SES?SES.user.email:L("guest");$("#av").textContent=(SES?SES.user.email:"M")[0].toUpperCase()}
-function greet(){const h=new Date().getHours(),k=h<5?"g4":h<12?"g1":h<18?"g2":"g3",n=SES&&SES.user.email.split("@")[0];return L(k)+(n?", "+n:"")}
+  $("#nProj").classList.toggle("on",S.view==="list"||S.view==="proj");
+  $("#who").textContent=S.name||(SES?SES.user.email:L("guest"));$("#av").textContent=(S.name||(SES?SES.user.email:"M"))[0].toUpperCase()}
+function greet(){const h=new Date().getHours(),k=h<5?"g4":h<12?"g1":h<18?"g2":"g3",n=S.name||(SES&&SES.user.email.split("@")[0]);return L(k)+(n?", "+n:"")}
+function drawThink(box,m){const t=m.think;
+  if(!t||(!t.steps.length&&!t.th)){box.textContent="";if(t&&t.ms&&!m.thinking&&m.content)box.appendChild(el$("div","tm",L("thought")+" "+Math.max(1,Math.round(t.ms/1000))+" "+L("sec")));return}
+  let d=box.firstChild;if(!d||d.tagName!=="DETAILS"){box.textContent="";d=el$("details","think");d.appendChild(el$("summary"));d.appendChild(el$("div","tl"));box.appendChild(d)}
+  const st=m.thinking?"1":"0";if(d.dataset.st!==st){d.dataset.st=st;d.open=!!m.thinking}
+  d.firstChild.textContent=(m.thinking?L("thinking"):L("thought"))+" "+Math.max(1,Math.round((t.ms||0)/1000))+" "+L("sec")+(t.steps.length?" · "+t.steps.length:"");
+  const tl=d.lastChild;tl.textContent="";
+  t.steps.forEach(x=>{const r=el$("div","st");r.appendChild(el$("b","",(x.done?"✓ ":"… ")+x.label+(x.ms?" · "+Math.max(0.1,Math.round(x.ms/100)/10)+" "+L("sec"):"")));if(x.detail)r.appendChild(el$("div","sd",x.detail));tl.appendChild(r)});
+  if(t.th)tl.appendChild(el$("blockquote","",t.th))}
+function startTick(a,t0){clearInterval(tick);tick=setInterval(()=>{if(!a.thinking){clearInterval(tick);return}a.think.ms=Date.now()-t0;const w=$("#wrap").lastElementChild;if(w&&w.querySelector(".tk"))drawThink(w.querySelector(".tk"),a)},250)}
+function rated(){const out=[];S.chats.forEach(c=>c.msgs.forEach((m,i)=>{if(m.role==="assistant"&&m.fb&&m.content&&i>0)out.push({q:c.msgs[i-1].content||"",a:m.content,r:m.fb,n:m.fbn||"",ctx:c.msgs.slice(Math.max(0,i-5),i).map(x=>({role:x.role,content:x.content})),t:c.updated||0})}));return out.sort((a,b)=>b.t-a.t)}
+function rate(m,v){if(m.fb===v){delete m.fb;delete m.fbn}else{m.fb=v;if(v===-1){const n=prompt(L("fbwhy"),m.fbn||"");if(n!==null)m.fbn=n.trim()}else delete m.fbn}save();render()}
+function undoMem(m){const k=m.mem||[];S.memory=(S.memory||"").split("\n").filter(l=>!k.includes(l.replace(/^•\s*/,""))).join("\n");delete m.mem;save();render()}
+function fbRow(m){const fb=el$("div","fb"),up=el$("button","ic"+(m.fb===1?" on":""),"👍"),dn=el$("button","ic"+(m.fb===-1?" on":""),"👎");
+  up.onclick=()=>rate(m,1);dn.onclick=()=>rate(m,-1);fb.append(up,dn);
+  if(m.mem&&m.mem.length){const ch=el$("span","memchip","🧠 "+L("remembered")+": "+m.mem.join("; ")+" "),un=el$("button","lnk",L("undo"));un.onclick=()=>undoMem(m);ch.appendChild(un);fb.appendChild(ch)}
+  return fb}
 function drawMsgs(){const c=cur(),w=$("#wrap");
   if(!c||!c.msgs.length){const p=NP&&proj(NP);w.innerHTML='<div id="empty"><h1></h1><p></p></div>';w.querySelector("h1").textContent=greet();w.querySelector("p").textContent=p?p.name:L("tag");return}
   w.innerHTML="";
   c.msgs.forEach(m=>{
     const d=document.createElement("div");d.className="m "+(m.role==="user"?"u":"a");
-    d.innerHTML=(m.role==="user"?"":"<small>Mark AI</small>")+'<div class="bub"></div>';
-    const bub=d.querySelector(".bub");bub.innerHTML=md(m.content||L(m.w||"wait"),m.role==="user");if(m.att&&m.att.length)bub.insertAdjacentHTML("afterbegin",attHtml(m.att));
-    if(m.kind==="img")bub.insertAdjacentHTML("beforeend",m.img?'<img class="img" alt="" src="'+m.img+'"><div class="acts"><a class="sm" download="mark-ai.png" href="'+m.img+'">'+L("dl")+'</a></div>':'<div style="color:var(--mute);font-size:13px">'+L("imggone")+'</div>');
+    if(m.role==="user"){d.innerHTML='<div class="bub"></div>';const bub=d.firstChild;bub.innerHTML=md(m.content,true);if(m.att&&m.att.length)bub.insertAdjacentHTML("afterbegin",attHtml(m.att))}
+    else{
+      d.innerHTML='<small>Mark AI</small><div class="bub"><div class="tk"></div><div class="ans"></div></div>';
+      drawThink(d.querySelector(".tk"),m);const an=d.querySelector(".ans");
+      an.innerHTML=md(m.content||(m.live&&!(m.think&&(m.think.steps.length||m.think.th))?L(m.w||"wait"):""),false);
+      if(m.kind==="img")an.insertAdjacentHTML("beforeend",m.img?'<img class="img" alt="" src="'+m.img+'"><div class="acts"><a class="sm" download="mark-ai.png" href="'+m.img+'">'+L("dl")+'</a></div>':'<div style="color:var(--mute);font-size:13px">'+L("imggone")+'</div>');
+      if(!m.live&&m.content)d.appendChild(fbRow(m))}
     w.appendChild(d)});
   $("#msgs").scrollTop=1e9}
 const KACC=".txt,.md,.json,.csv,.js,.ts,.py,.html,.css,.java,.c,.cpp,.cs,.lua,.luau,.xml,.yml,.yaml,.log";
 function drawPV(){const el=$("#pview");
   if(S.view==="chat"){el.innerHTML="";return}
+  if(S.view==="acc"){drawAcc(el);return}
   if(S.view==="list"){
     el.innerHTML='<div class="pg"><div class="rowh"><h2></h2><button class="btn pri" id="np"></button></div><div class="grid"></div></div>';
     el.querySelector("h2").textContent=L("projects");$("#np").textContent="＋ "+L("newproj");
@@ -299,18 +331,58 @@ function drawPV(){const el=$("#pview");
   $("#pf").onchange=async e=>{for(const f of e.target.files){if(f.size>150000)continue;try{const t=await readF(f,"readAsText");if(!t.includes("\u0000")){(p.know=p.know||[]).push({name:f.name,text:t})}}catch(er){}}e.target.value="";save();kn()};
   const pc=$("#pc");S.chats.filter(c=>c.project===p.id).sort((a,b)=>(b.updated||0)-(a.updated||0)).forEach(c=>{const d=document.createElement("div");d.className="chat";d.innerHTML="<span></span>";d.firstChild.textContent="💬 "+c.title;d.onclick=()=>{S.cur=c.id;setView("chat")};pc.appendChild(d)});
   $("#pd").onclick=()=>{if(confirm(L("delq"))){S.chats=S.chats.filter(c=>c.project!==p.id);S.projects=S.projects.filter(x=>x.id!==p.id);if(!cur())S.cur=null;setView("list")}}}
+const el$=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+async function refreshUser(){try{const r=await fetch(SB_URL+"/auth/v1/user",{headers:sbh(await token())});if(r.ok&&SES){SES.user=await r.json();localStorage.setItem("markai_ses",JSON.stringify(SES))}}catch(e){}}
+async function linkGoogle(){try{const r=await fetch(SB_URL+"/auth/v1/user/identities/authorize?provider=google&skip_http_redirect=true&redirect_to="+encodeURIComponent(location.origin+location.pathname),{headers:sbh(await token())});const j=await r.json();if(j.url)location.href=j.url;else throw new Error(j.msg||j.message||j.error_description||"error")}catch(e){alert(L("err")+": "+e.message)}}
+function dl(text,name,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+function exportData(){dl(JSON.stringify(snap(),null,1),"mark-ai-chats.json","application/json")}
+function exportDataset(){dl(rated().map(e=>JSON.stringify({messages:[...e.ctx,{role:"assistant",content:e.a}],rating:e.r,note:e.n})).join("\n"),"mark-ai-dataset.jsonl","application/jsonl")}
+function drawAcc(root){
+  root.innerHTML="";const pg=el$("div","pg");root.appendChild(pg);pg.appendChild(el$("h2","",L("account")));
+  const sec=t=>{const x=el$("div","sec");x.appendChild(el$("h3","",t));pg.appendChild(x);return x};
+  const fld=(x,label,ctl)=>{x.appendChild(el$("label","",label));x.appendChild(ctl)};
+  const sel=(opts,val,fn)=>{const x=el$("select");opts.forEach(([v,t])=>{const o=el$("option","",t);o.value=v;x.appendChild(o)});x.value=val;x.onchange=()=>fn(x.value);return x};
+  let x=sec(L("profile"));
+  const row=el$("div","who2");row.appendChild(el$("div","av big",(S.name||(SES?SES.user.email:"M"))[0].toUpperCase()));
+  const info=el$("div"),nm=el$("input","nm");nm.value=S.name||"";nm.placeholder=L("yname");nm.oninput=()=>{S.name=nm.value;save()};
+  info.appendChild(nm);info.appendChild(el$("small","",SES?SES.user.email:L("guest")));row.appendChild(info);x.appendChild(row);
+  if(SB&&SES){x=sec(L("signin"));
+    const prov=[...new Set([...(SES.user.identities||[]).map(i=>i.provider),...((SES.user.app_metadata||{}).providers||[])])];
+    const li=(name,ok,btn)=>{const r=el$("div","kf");r.appendChild(el$("span","",name));if(ok)r.appendChild(el$("small","",L("linked")));else if(btn)r.appendChild(btn);x.appendChild(r)};
+    li("Email",prov.includes("email"));
+    const gb=el$("button","btn",L("linkg"));gb.onclick=linkGoogle;li("Google",prov.includes("google"),gb);
+    const pw=el$("input");pw.type="password";pw.placeholder=L("newpass");pw.autocomplete="new-password";
+    const pb=el$("button","btn",L("setpass")),msg=el$("small");
+    pb.onclick=async()=>{try{const r=await fetch(SB_URL+"/auth/v1/user",{method:"PUT",headers:sbh(await token()),body:JSON.stringify({password:pw.value})});const j=await r.json();if(!r.ok)throw new Error(j.msg||j.message||j.error_description||"error");msg.textContent=L("passok");pw.value=""}catch(e){msg.textContent=e.message}};
+    fld(x,L("pwd"),pw);x.appendChild(pb);x.appendChild(msg)}
+  x=sec(L("cfgTitle"));
+  fld(x,L("lang"),sel([["auto","Auto"],["ru","Русский"],["en","English"],["az","Azərbaycanca"],["tr","Türkçe"],["de","Deutsch"]],S.lang||"auto",v=>{S.lang=v;save();render()}));
+  fld(x,L("theme"),sel([["auto",L("tAuto")],["light",L("tLight")],["dark",L("tDark")]],S.theme||"auto",v=>{S.theme=v;save();render()}));
+  fld(x,L("think"),sel([["auto",L("tAuto")],["deep",L("deep")],["agent",L("agent")],["fast",L("fast")]],S.think||"auto",v=>{S.think=v;save()}));
+  fld(x,L("web"),sel([["auto",L("tAuto")],["on",L("won")],["off",L("woff")]],S.web||"auto",v=>{S.web=v;save()}));
+  fld(x,L("automem"),sel([["on",L("won")],["off",L("woff")]],S.automem||"on",v=>{S.automem=v;save()}));
+  const ta=el$("textarea");ta.rows=4;ta.value=S.sys;ta.oninput=()=>{S.sys=ta.value.trim()||DEF_SYS;save()};fld(x,L("sys"),ta);
+  if(!SB){const t=el$("input");t.type="password";t.value=S.token||"";t.oninput=()=>{S.token=t.value.trim();save()};fld(x,L("tok"),t)}
+  x=sec(L("mem"));x.appendChild(el$("small","",L("memh")));const mt=el$("textarea");mt.rows=4;mt.value=S.memory||"";mt.oninput=()=>{S.memory=mt.value;save()};x.appendChild(mt);
+  x=sec(L("data"));{const r=rated();x.appendChild(el$("small","",L("rated")+": 👍 "+r.filter(e=>e.r===1).length+" · 👎 "+r.filter(e=>e.r===-1).length))}const bar=el$("div","acts"),bx=el$("button","btn",L("export")),bc=el$("button","btn",L("clearall"));
+  bx.onclick=exportData;bc.onclick=()=>{if(confirm(L("clearq"))){S.chats=[];S.cur=null;save();render()}};const bd=el$("button","btn",L("dset"));bd.onclick=exportDataset;bar.append(bx,bd,bc);
+  if(SB){const bo=el$("button","btn",L("out"));bo.onclick=()=>$("#out").click();bar.append(bo)}x.appendChild(bar)}
 function render(){
   applyTheme();applyLang();
   const main=$("#main");main.dataset.v=S.view;
   main.classList.toggle("empty",S.view==="chat"&&!(cur()&&cur().msgs.length));
-  $("#ttl").textContent=S.view==="list"?L("projects"):S.view==="proj"?(proj(S.vp)||{}).name||"":(cur()?cur().title:"");
+  $("#ttl").textContent=S.view==="acc"?L("account"):S.view==="list"?L("projects"):S.view==="proj"?(proj(S.vp)||{}).name||"":(cur()?cur().title:"");
   drawList();drawMsgs();drawPV()}
 
 /* ===== Отправка ===== */
-function sysFor(c){const p=c.project&&proj(c.project);let s=S.sys;
+function learned(){const r=rated(),good=r.filter(e=>e.r===1).slice(0,3),bad=r.filter(e=>e.r===-1&&e.n).slice(0,5);let t="";
+  if(good.length)t+="\n\nПримеры ответов, которые пользователю понравились (ориентируйся на их стиль и подробность):\n"+good.map(e=>"Вопрос: "+e.q.slice(0,200)+"\nОтвет: "+e.a.slice(0,500)).join("\n---\n");
+  if(bad.length)t+="\n\nПользователю не понравилось (учитывай и не повторяй): "+bad.map(e=>e.n.slice(0,150)).join("; ");
+  return t.slice(0,3500)}
+function sysFor(c){const p=c.project&&proj(c.project);let s=S.sys;if(S.name)s+="\n\nПользователя зовут "+S.name+".";if(S.memory&&S.memory.trim())s+="\n\nЧто пользователь просил помнить о себе:\n"+S.memory.trim().slice(-4000);
   if(p){s+="\n\nТы работаешь внутри проекта «"+p.name+"»."+(p.instr?"\nИнструкции проекта:\n"+p.instr:"");
     if(p.know&&p.know.length)s+="\n\nБаза знаний проекта (используй при ответах):\n"+p.know.map(k=>"### "+k.name+"\n"+k.text).join("\n\n").slice(0,60000)}
-  return s}
+  return s+learned()}
 const apiMsg=m=>({role:m.role,content:m.content,files:(m.att||[]).filter(f=>f.data).map(({name,mime,kind,data})=>({name,mime,kind,data}))});
 const IMGRE=/(сгенерируй|создай|сделай|нарисуй|покажи|generate|create|make|draw)( мне| me)?( a| an| одну| пару)? (картинк|фото|изображени|рисунок|иллюстраци|image|picture|photo|illustration)/i;
 async function send(text){
@@ -321,9 +393,13 @@ async function send(text){
   const att=pend.splice(0);showChips();c.msgs.push({role:"user",content:text||"📎",att});
   if(c.msgs.length===1)c.title=(text||att[0]?.name||"📎").slice(0,40);
   c.updated=Date.now();
-  const a={role:"assistant",content:""};if(wantImg){a.kind="img";a.w="imgwait"}c.msgs.push(a);
+  const a={role:"assistant",content:"",live:true},t0=Date.now();
+  if(wantImg){a.kind="img";a.w="imgwait"}else{a.think={ms:0,steps:[],th:""};a.thinking=true;startTick(a,t0)}
+  c.msgs.push(a);const think=agentMode?"agent":(S.think||"auto");agentMode=false;$("#agb").classList.remove("on");
+  let fail="",ok=true;
   busy=true;$("#send").disabled=true;save();render();
-  const upd=()=>{const w=$("#wrap");if(!w.lastElementChild)return;const b=w.lastElementChild.querySelector(".bub");b.innerHTML=md(a.content||L(a.w||"wait"));$("#msgs").scrollTop=1e9};
+  const upd=()=>{const w=$("#wrap").lastElementChild;if(!w||!w.querySelector(".ans"))return;drawThink(w.querySelector(".tk"),a);
+    w.querySelector(".ans").innerHTML=md(a.content||(a.think&&(a.think.steps.length||a.think.th)?"":L(a.w||"wait")),false);$("#msgs").scrollTop=1e9};
   try{
     ctrl=new AbortController();
     if(a.kind==="img"){
@@ -331,14 +407,33 @@ async function send(text){
       if(!r.ok){const t=await r.text();throw new Error(r.status+(t?" — "+t.slice(0,300):""))}
       const j=await r.json();a.img=j.image;a.content="🖼 "+text.slice(0,80);
     }else{
-      const r=await fetch(WORKER,{method:"POST",signal:ctrl.signal,headers:await hdr(),body:JSON.stringify({mode:"merge",lang:S.lang||"auto",system:sysFor(c),messages:c.msgs.slice(0,-1).map(apiMsg)})});
+      const r=await fetch(WORKER,{method:"POST",signal:ctrl.signal,headers:await hdr(),body:JSON.stringify({mode:"merge",lang:S.lang||"auto",think,web:S.web||"auto",system:sysFor(c),messages:c.msgs.slice(0,-1).map(apiMsg)})});
       if(!r.ok){const t=await r.text();throw new Error(r.status+(t?" — "+t.slice(0,300):""))}
-      const rd=r.body.getReader(),dec=new TextDecoder();
-      for(;;){const{done,value}=await rd.read();if(done)break;a.content+=dec.decode(value,{stream:true});upd()}
+      const T=a.think,lastS=()=>T.steps[T.steps.length-1],closeS=()=>{const x=lastS();if(x&&!x.done){x.done=true;x.ms=Date.now()-x.t0}};
+      const ev=o=>{
+        if(o.t==="step"){closeS();T.steps.push({label:o.label,detail:o.detail||"",t0:Date.now()})}
+        else if(o.t==="detail"){const x=lastS();if(x)x.detail=(x.detail?x.detail+"\n":"")+o.d}
+        else if(o.t==="thought")T.th=((T.th||"")+o.d).slice(0,4000);
+        else if(o.t==="text"){if(a.thinking){closeS();a.thinking=false;T.ms=Date.now()-t0;clearInterval(tick)}a.content+=o.d}
+        else if(o.t==="error")fail=o.m;
+        upd()};
+      const nd=(r.headers.get("content-type")||"").includes("ndjson"),rd=r.body.getReader(),dec=new TextDecoder();let buf="";
+      for(;;){const{done,value}=await rd.read();if(done)break;const ch=dec.decode(value,{stream:true});
+        if(!nd){ev({t:"text",d:ch});continue}
+        buf+=ch;let i;while((i=buf.indexOf("\n"))>=0){const ln=buf.slice(0,i);buf=buf.slice(i+1);if(ln.trim()){try{ev(JSON.parse(ln))}catch(e){}}}}
+      if(fail)throw new Error(fail);
     }
-  }catch(e){if(e.name!=="AbortError")a.content+=(a.content?"\n\n":"")+L("err")+": "+e.message+"\n\n"+L("chk")}
+  }catch(e){ok=false;if(e.name!=="AbortError")a.content+=(a.content?"\n\n":"")+L("err")+": "+e.message+"\n\n"+L("chk")}
+  clearInterval(tick);
+  if(a.think){a.thinking=false;if(!a.think.ms)a.think.ms=Date.now()-t0;const x=a.think.steps[a.think.steps.length-1];if(x&&!x.done){x.done=true;x.ms=Date.now()-x.t0}}
   if(a.kind==="img"&&!a.img)delete a.kind;
-  busy=false;ctrl=null;$("#send").disabled=false;c.updated=Date.now();save();a.kind==="img"?render():upd();drawList()}
+  a.live=false;busy=false;ctrl=null;$("#send").disabled=false;c.updated=Date.now();save();render();
+  if(ok&&!a.kind&&a.content)autoMemory(a,text)}
+const PERS=/(^|\s)(я |мой|моя|моё|мои|мне |меня |люблю|работаю|учусь|хочу|планирую|делаю|создаю|запомни|i am|i'm|my |i like|i work|remember)/i;
+async function autoMemory(a,text){if(S.automem==="off"||text.length<15||!PERS.test(text))return;
+  try{const r=await fetch(WORKER,{method:"POST",headers:await hdr(),body:JSON.stringify({mode:"memory",user:text,assistant:a.content,memory:S.memory||""})});if(!r.ok)return;
+    const j=await r.json(),known=(S.memory||"").toLowerCase(),add=(j.add||[]).filter(f=>!known.includes(f.toLowerCase().slice(0,40)));
+    if(add.length){S.memory=((S.memory||"").trim()?S.memory.trim()+"\n":"")+add.map(f=>"• "+f).join("\n");a.mem=add;save();render()}}catch(e){}}
 
 /* ===== Вложения ===== */
 function showChips(){const c=$("#chips");c.innerHTML="";pend.forEach((f,i)=>{const d=document.createElement("span");d.className="chip";d.innerHTML=(f.url?'<img alt="">':"📎")+"<span></span><b>✕</b>";if(f.url)d.querySelector("img").src=f.url;d.querySelector("span").textContent=f.name;d.querySelector("b").onclick=()=>{pend.splice(i,1);showChips()};c.appendChild(d)})}
@@ -377,12 +472,13 @@ $("#in").addEventListener("paste",e=>{const fs=[...(e.clipboardData?.files||[])]
 $("#att").onclick=()=>$("#fi").click();
 $("#fi").onchange=e=>{addFiles([...e.target.files]);e.target.value=""};
 $("#imgb").onclick=()=>{imgMode=!imgMode;$("#imgb").classList.toggle("on",imgMode);applyLang();$("#in").focus()};
+$("#agb").onclick=()=>{agentMode=!agentMode;$("#agb").classList.toggle("on",agentMode);$("#in").focus()};
 $("#nNew").onclick=()=>newChat();
 $("#nProj").onclick=()=>setView("list");
 $("#tog").onclick=()=>{const s=$("#side");matchMedia("(max-width:760px)").matches?s.classList.toggle("open"):s.classList.toggle("hide")};
-$("#cfg").onclick=()=>{$("#tok").value=S.token||"";$("#tokw").style.display=SB?"none":"";$("#lang").value=S.lang||"auto";$("#theme").value=S.theme||"auto";$("#sys").value=S.sys;$("#dlg").showModal()};
-$("#cancel").onclick=()=>$("#dlg").close();
-$("#save").onclick=()=>{S.token=$("#tok").value.trim();S.lang=$("#lang").value;S.theme=$("#theme").value;S.sys=$("#sys").value.trim()||DEF_SYS;save();$("#dlg").close();render()};
+$("#cfg").onclick=()=>setView("acc");
+$("#av").onclick=$("#who").onclick=()=>setView("acc");
+$("#aG").onclick=()=>{location.href=SB_URL+"/auth/v1/authorize?provider=google&redirect_to="+encodeURIComponent(location.origin+location.pathname)};
 $("#wrap").onclick=e=>{
   const p=e.target.closest("[data-prev]");if(p){PV=p.closest(".code").querySelector("pre").textContent;$("#pvf").srcdoc=PV;$("#pv").showModal();return}
   const b=e.target.closest("[data-copy]");if(b){navigator.clipboard.writeText(b.closest(".code").querySelector("pre").textContent);b.textContent=L("copied");setTimeout(()=>b.textContent=L("copy"),1200)}};
@@ -390,8 +486,11 @@ $("#pvX").onclick=()=>{$("#pv").close();$("#pvf").srcdoc=""};
 $("#pvDl").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([PV],{type:"text/html"}));a.download="index.html";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
 
 /* ===== Старт ===== */
+async function oauthReturn(){const h=location.hash;if(!/access_token=|error_description=/.test(h))return"";const p=new URLSearchParams(h.slice(1));history.replaceState(null,"",location.pathname+location.search);
+  if(p.get("error_description"))return p.get("error_description");
+  try{const t=p.get("access_token"),r=await fetch(SB_URL+"/auth/v1/user",{headers:sbh(t)});setSes({access_token:t,refresh_token:p.get("refresh_token"),expires_in:+p.get("expires_in")||3600,user:await r.json()})}catch(e){return e.message}return""}
 S=blank();
-if(SB&&!SES){showAuth();render()}else boot();
+(async()=>{const err=SB?await oauthReturn():"";if(SB&&!SES){showAuth();$("#authErr").textContent=err;render()}else boot()})();
 </script>
 </body>
 </html>
