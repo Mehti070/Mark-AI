@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Mark AI</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#5656d6">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
 <style>
 :root{--bg:#f7f7fa;--panel:#fff;--side:#eeeef5;--line:#e0e1ec;--text:#1e2133;--mute:#6b7089;--acc:#5656d6;--acc2:#e6e6fa;--user:#e9e9f5;--code:#f1f1f7;--r:14px}
 html[data-theme=dark]{--bg:#14151d;--panel:#1c1e29;--side:#101118;--line:#2a2d3b;--text:#e8e9f1;--mute:#8c90a6;--acc:#8d8df7;--acc2:#2b2e4d;--user:#252941;--code:#0e0f15}
@@ -41,7 +46,7 @@ header{display:flex;align-items:center;gap:8px;padding:10px 14px}
 #status{margin-left:auto;color:var(--mute);font-size:13px}
 #msgs{flex:1;overflow:auto;padding:8px 16px}
 #pview{flex:1;overflow:auto;padding:8px 16px 16px}
-#main[data-v=chat] #pview,#main[data-v=proj] #msgs,#main[data-v=list] #msgs,#main[data-v=list] #comp,#main[data-v=acc] #msgs,#main[data-v=acc] #comp{display:none}
+#main[data-v=chat] #pview,#main[data-v=proj] #msgs,#main[data-v=list] #msgs,#main[data-v=list] #comp,#main[data-v=acc] #msgs,#main[data-v=acc] #comp,#main[data-v=plans] #msgs,#main[data-v=plans] #comp{display:none}
 #main.empty #msgs{flex:none;overflow:visible}
 #main.empty header{margin-bottom:auto}
 #main.empty #comp{margin-bottom:auto}
@@ -128,6 +133,20 @@ dialog textarea{min-height:110px;resize:vertical}
 .fb{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-top:2px}
 .fb .ic{padding:2px 8px;font-size:14px}.fb .ic.on{background:var(--acc2);color:var(--text)}
 .memchip{font-size:12px;color:var(--mute);background:var(--acc2);border-radius:10px;padding:2px 4px 2px 10px}
+.qs{margin:2px 4px 6px;width:calc(100% - 8px);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px}
+.meter{display:none;margin:6px 4px 0;padding:8px 10px;border:1px solid var(--line);border-radius:12px;font-size:12px;color:var(--mute);cursor:pointer;background:var(--panel)}
+.meter b{color:var(--text);font-weight:600}
+.bar2{height:5px;border-radius:3px;background:var(--line);margin:3px 0 6px;overflow:hidden}.bar2>i{display:block;height:100%;background:var(--acc)}
+.plans{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.plan{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.plan.cur{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.plan h3{margin:0;font-size:18px}.plan .pr{font:400 28px Georgia,serif}.plan .pr small{font:13px "Segoe UI",sans-serif;color:var(--mute)}
+.plan ul{margin:4px 0;padding-left:18px;color:var(--mute);font-size:13px;flex:1}.plan li{margin:3px 0}
+.ua{align-self:flex-end;opacity:0;transition:opacity .15s}.m.u:hover .ua{opacity:1}
+@media(hover:none){.ua{opacity:1}}
+.menu{position:fixed;z-index:30;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.25);display:flex;flex-direction:column;min-width:170px}
+.menu button{background:none;border:0;text-align:left;padding:7px 12px;border-radius:8px}.menu button:hover{background:var(--acc2)}
+.tw{overflow-x:auto;margin:.5em 0}.bub table{border-collapse:collapse}.bub th,.bub td{border:1px solid var(--line);padding:6px 10px;text-align:left}.bub th{background:var(--acc2)}
 @media(max-width:760px){
  #side{position:fixed;inset:0 auto 0 0;z-index:5;margin:0!important;transform:translateX(-100%);transition:transform .2s;padding-top:calc(12px + env(safe-area-inset-top,0px))}
  #side.open{transform:none;box-shadow:0 0 40px rgba(0,0,0,.35)}
@@ -142,8 +161,11 @@ dialog textarea{min-height:110px;resize:vertical}
   <div class="brand">Mark <i>AI</i></div>
   <button class="nav" id="nNew"><span>＋</span><span data-i="new">Новый чат</span></button>
   <button class="nav" id="nProj"><span>▦</span><span data-i="projects">Проекты</span></button>
+  <button class="nav" id="nPlan"><span>★</span><span data-i="plans">Тарифы</span></button>
+  <input id="qs" type="search" class="qs" autocomplete="off">
   <div class="lbl" data-i="recent">Недавние</div>
   <div id="list"></div>
+  <div id="meter" class="meter"></div>
   <div id="me"><div class="av" id="av">M</div><div id="who"></div><button class="ic" id="cfg" aria-label="Settings">⚙</button><button class="ic" id="out" aria-label="Log out">⎋</button></div>
 </aside>
 <main id="main" data-v="chat">
@@ -159,6 +181,8 @@ dialog textarea{min-height:110px;resize:vertical}
         <button id="att" class="ic" type="button">📎</button><input type="file" id="fi" multiple hidden accept="image/*,.pdf,.txt,.md,.json,.csv,.js,.ts,.py,.html,.css,.java,.c,.cpp,.cs,.lua,.luau,.xml,.yml,.yaml,.log">
         <button id="imgb" class="ic" type="button">🖼</button>
         <button id="agb" class="ic" type="button">🤖</button>
+        <button id="rsb" class="ic" type="button">🔎</button>
+        <button id="mic" class="ic" type="button">🎤</button>
         <button id="send" type="submit" aria-label="Send">↑</button>
       </div>
     </div>
@@ -176,6 +200,8 @@ dialog textarea{min-height:110px;resize:vertical}
     <button class="btn pri" id="aGo" type="submit"></button>
     <button class="btn" id="aG" type="button"></button>
     <button class="lnk" id="aSw" type="button"></button>
+    <button class="lnk" id="aFg" type="button"></button>
+    <button class="lnk" id="aRe" type="button" hidden></button>
   </form>
 </div>
 
@@ -191,14 +217,15 @@ const WORKER="https://lingering-leaf-cd4f.mehtiagazade07.workers.dev/";
 const SB_URL="";   // например https://abcdxyz.supabase.co
 const SB_KEY="sb_publishable_LxUH2qfS0TrLJS8gKh64JQ_zR8B9qHc";   // публичный (publishable) ключ Supabase
 /* ================================== */
+const PLAN_LINKS={plus:"",pro:"",programmer:""};   // ссылки на оплату тарифов (появятся после подключения платежей)
 const SB=!!(SB_URL&&SB_KEY);
 const DEF_SYS="Ты Mark AI — личный ИИ-помощник. Отвечай на языке пользователя, по делу и дружелюбно. Без необходимости не упоминай, на каких технологиях ты построен. Код оформляй в блоках.";
 let S,SES=null;
 try{SES=JSON.parse(localStorage.getItem("markai_ses")||"null")}catch(e){}
 const KEY=()=>"markai:"+(SES?SES.user.id:"guest");
-const blank=()=>({chats:[],projects:[],cur:null,vp:null,view:"chat",sys:DEF_SYS,lang:"auto",theme:"auto",token:"",name:"",memory:"",think:"auto",web:"auto",automem:"on"});
+const blank=()=>({chats:[],projects:[],cur:null,vp:null,view:"chat",sys:DEF_SYS,lang:"auto",theme:"auto",token:"",name:"",memory:"",think:"auto",web:"auto",automem:"on",ctags:[]});
 const repl=(k,v)=>k==="img"||k==="live"||k==="thinking"?undefined:k==="att"&&Array.isArray(v)?v.map(f=>({name:f.name,kind:f.kind})):v;
-const snap=()=>JSON.parse(JSON.stringify({chats:S.chats,projects:S.projects,sys:S.sys,lang:S.lang,theme:S.theme,name:S.name,memory:S.memory,think:S.think,web:S.web,automem:S.automem},repl));
+const snap=()=>JSON.parse(JSON.stringify({chats:S.chats,projects:S.projects,sys:S.sys,lang:S.lang,theme:S.theme,name:S.name,memory:S.memory,think:S.think,web:S.web,automem:S.automem,ctags:S.ctags},repl));
 const uid=()=>Math.random().toString(36).slice(2,10);
 
 /* ===== Язык интерфейса (новые строки есть на ru/en, остальные языки берут русский) ===== */
@@ -216,26 +243,31 @@ Object.assign(I.ru,{account:"Личный кабинет",profile:"Профил�
 Object.assign(I.ru,{thinking:"Думаю…",thought:"Думал",sec:"с",fbwhy:"Что не так? (необязательно)",remembered:"Запомнил",undo:"отменить",agt:"Агентный режим: план → поиск и код → проверка",agent:"Агент (план, поиск, код, проверка)",automem:"Автопамять",dset:"Скачать набор данных (JSONL)",rated:"Оценок"});
 Object.assign(I.en,{thinking:"Thinking…",thought:"Thought for",sec:"s",fbwhy:"What was wrong? (optional)",remembered:"Remembered",undo:"undo",agt:"Agent mode: plan → search & code → verify",agent:"Agent (plan, search, code, verify)",automem:"Auto memory",dset:"Download dataset (JSONL)",rated:"Ratings"});
 Object.assign(I.en,{account:"Account",profile:"Profile",yname:"What should I call you",signin:"Sign-in methods",linked:"connected",linkg:"Link Google",pwd:"Password",newpass:"New password (6+ characters)",setpass:"Change password",passok:"Password changed",think:"Thinking mode",deep:"Deep (smarter, slower)",fast:"Fast",web:"Web search",won:"Always",woff:"Off",mem:"Memory",memh:"What Mark AI should remember about you (used in all chats)",data:"Data",export:"Export my chats",clearall:"Delete all chats",clearq:"Delete all chats?",withg:"Continue with Google"});
-let imgMode=false,agentMode=false,tick=null,NP=null,busy=false,ctrl=null,pend=[],PV="";
+Object.assign(I.ru,{plans:"Тарифы",search:"Поиск по чатам",mic:"Голосовой ввод",rsb:"Глубокое исследование (тариф Pro и выше)",meterUse:"сообщ.",meterImg:"фото",resetIn:"Сброс через",h:"ч",min:"мин",plansTitle:"Тарифы Mark AI",perMonth:"в месяц",free:"Бесплатно",curPlan:"Текущий",choose:"Выбрать",payLater:"Оплата скоро появится. Пока тариф можно получить у владельца сайта.",pl_basic:"Быстрая модель, поиск в интернете, ссылки и файлы",pl_plus:"Умная модель для сложных вопросов и агентный режим",pl_pro:"Глубокое мышление и глубокое исследование с источниками",pl_programmer:"Всё из Pro и эксперт по программированию с запуском кода",plcost:"Обычное сообщение = 1 использование, агент = 3, глубокое исследование = 5. Лимит обновляется через 5 часов после первого сообщения.",limitMsg:"Лимит исчерпан. Он обновится через {t}. Можно перейти на тариф выше.",tierMsg:"Эта функция доступна с тарифа {p}.",stopped:"Остановлено.",regen:"Ответить заново",edit:"Изменить и отправить заново",speak:"Озвучить",file:"Скачать как",fWord:"Word (.docx)",fPdf:"PDF",fXls:"Excel (.xlsx)",fMd:"Markdown (.md)",fTxt:"Текст (.txt)",saveCode:"Скачать файл",ctags:"Мои хештеги",ctn:"Название (без #)",cti:"Что он значит",ctadd:"Добавить хештег",forgot:"Забыли пароль?",resend:"Отправить письмо ещё раз",sent:"Письмо отправлено на {e}. Открой его и нажми ссылку подтверждения.",resetSent:"Письмо для смены пароля отправлено на почту.",setnew:"Введи новый пароль в разделе «Способы входа» кабинета.",app:"Приложение",install:"Установить на телефон или компьютер",installed:"Приложение уже установлено.",iosHint:"Чтобы установить: в меню браузера выбери «Установить приложение» (на iPhone: «Поделиться» → «На экран Домой»).",sheet:"Таблица"});
+Object.assign(I.en,{plans:"Plans",search:"Search chats",mic:"Voice input",rsb:"Deep research (Pro and above)",meterUse:"msgs",meterImg:"images",resetIn:"Resets in",h:"h",min:"min",plansTitle:"Mark AI plans",perMonth:"per month",free:"Free",curPlan:"Current",choose:"Choose",payLater:"Payments are coming soon. For now ask the site owner for a plan.",pl_basic:"Fast model, web search, links and files",pl_plus:"Smarter model for hard questions and agent mode",pl_pro:"Deep thinking and deep research with sources",pl_programmer:"Everything in Pro plus a programming expert that runs code",plcost:"A regular message = 1 use, agent = 3, deep research = 5. The limit resets 5 hours after the first message.",limitMsg:"Limit reached. It resets in {t}. You can upgrade your plan.",tierMsg:"This feature needs the {p} plan.",stopped:"Stopped.",regen:"Regenerate",edit:"Edit and resend",speak:"Read aloud",file:"Download as",fWord:"Word (.docx)",fPdf:"PDF",fXls:"Excel (.xlsx)",fMd:"Markdown (.md)",fTxt:"Text (.txt)",saveCode:"Download file",ctags:"My hashtags",ctn:"Name (without #)",cti:"What it means",ctadd:"Add hashtag",forgot:"Forgot password?",resend:"Resend the email",sent:"Email sent to {e}. Open it and tap the confirmation link.",resetSent:"A password reset email has been sent.",setnew:"Enter your new password in the account page (Sign-in methods).",app:"App",install:"Install on phone or computer",installed:"The app is already installed.",iosHint:"To install: use “Install app” in the browser menu (iPhone: Share → Add to Home Screen).",sheet:"Table"});
+let imgMode=false,agentMode=false,researchMode=false,RECOV=false,tick=null,NP=null,busy=false,ctrl=null,pend=[],PV="";
 
 /* ===== Supabase (регистрация и синхронизация) ===== */
 const sbh=t=>{const h={apikey:SB_KEY,"Content-Type":"application/json"};if(t)h.Authorization="Bearer "+t;return h};
-async function sbAuth(path,body){const r=await fetch(SB_URL+"/auth/v1/"+path,{method:"POST",headers:sbh(),body:JSON.stringify(body)});const j=await r.json();if(!r.ok)throw new Error(j.error_description||j.msg||j.message||"error");return j}
+async function sbAuth(path,body){const r=await fetch(SB_URL+"/auth/v1/"+path,{method:"POST",headers:sbh(),body:JSON.stringify(body)});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error_description||j.msg||j.message||"error");return j}
 function setSes(j){SES=j&&j.access_token?{access_token:j.access_token,refresh_token:j.refresh_token,expires_at:Date.now()/1000+(j.expires_in||3600)-60,user:j.user||(SES&&SES.user)}:null;try{SES?localStorage.setItem("markai_ses",JSON.stringify(SES)):localStorage.removeItem("markai_ses")}catch(e){}}
 async function token(){if(!SES)return"";if(Date.now()/1000>SES.expires_at){try{setSes(await sbAuth("token?grant_type=refresh_token",{refresh_token:SES.refresh_token}))}catch(e){setSes(null);showAuth()}}return SES?SES.access_token:""}
 const hdr=async()=>SB?{"Content-Type":"application/json",Authorization:"Bearer "+await token()}:{"Content-Type":"application/json","X-Access":S.token||""};
 let pt;function push(){if(!SB||!SES)return;clearTimeout(pt);pt=setTimeout(async()=>{try{await fetch(SB_URL+"/rest/v1/user_data?on_conflict=user_id",{method:"POST",headers:{...sbh(await token()),Prefer:"resolution=merge-duplicates"},body:JSON.stringify({user_id:SES.user.id,data:snap(),updated_at:new Date().toISOString()})})}catch(e){}},1500)}
 function save(){try{localStorage.setItem(KEY(),JSON.stringify(S,repl))}catch(e){}push()}
 function heal(){S.chats.forEach(c=>c.msgs.forEach(m=>{if(m.role==="assistant"&&typeof m.content==="string"&&m.content.startsWith('{"t":"')){let t="",e="";m.content.split("\n").forEach(l=>{try{const o=JSON.parse(l);if(o.t==="text")t+=o.d;else if(o.t==="error")e=o.m}catch(x){}});m.content=t||(e?L("err")+": "+e:"…")}}))}
-function loadLocal(){S=blank();try{const raw=localStorage.getItem(KEY())||(!SB?localStorage.getItem("markai"):null);Object.assign(S,JSON.parse(raw||"{}"))}catch(e){}if(!["chat","list","proj","acc"].includes(S.view))S.view="chat";heal()}
-async function boot(){loadLocal();render();loadTags();
+function loadLocal(){S=blank();try{const raw=localStorage.getItem(KEY())||(!SB?localStorage.getItem("markai"):null);Object.assign(S,JSON.parse(raw||"{}"))}catch(e){}if(!["chat","list","proj","acc","plans"].includes(S.view))S.view="chat";heal()}
+async function boot(){loadLocal();render();loadTags();refreshUsage();
   if(SB&&SES){await refreshUser();try{const r=await fetch(SB_URL+"/rest/v1/user_data?select=data&user_id=eq."+SES.user.id,{headers:sbh(await token())});const j=await r.json();const d=j[0]&&j[0].data;if(d&&d.chats){Object.assign(S,d);heal();if(!cur())S.cur=null;render();try{localStorage.setItem(KEY(),JSON.stringify(S,repl))}catch(e){}}}catch(e){}}}
 let signup=false;
-function authMode(){$("#aTitle").textContent=L(signup?"signup":"login");$("#aGo").textContent=L(signup?"signup":"login");$("#aSw").textContent=L(signup?"or2":"or1");$("#aMail").placeholder=L("email");$("#aPass").placeholder=L("pass");$("#aG").textContent=L("withg")}
+function authMode(){$("#aTitle").textContent=L(signup?"signup":"login");$("#aGo").textContent=L(signup?"signup":"login");$("#aSw").textContent=L(signup?"or2":"or1");$("#aMail").placeholder=L("email");$("#aPass").placeholder=L("pass");$("#aG").textContent=L("withg");$("#aFg").textContent=L("forgot");$("#aFg").hidden=signup;$("#aRe").textContent=L("resend")}
 function showAuth(){S=S||blank();$("#auth").hidden=false;authMode()}
 $("#aSw").onclick=()=>{signup=!signup;authMode()};
+$("#aFg").onclick=async()=>{const email=$("#aMail").value.trim();if(!email){$("#authErr").textContent=L("email");return}
+  try{await sbAuth("recover?redirect_to="+encodeURIComponent(location.origin+location.pathname),{email});$("#authErr").textContent=L("resetSent")}catch(e){$("#authErr").textContent=e.message}};
+$("#aRe").onclick=async()=>{const email=$("#aMail").value.trim();try{await sbAuth("resend",{type:"signup",email});$("#authErr").textContent=L("sent").replace("{e}",email)}catch(e){$("#authErr").textContent=e.message}};
 $("#aform").onsubmit=async e=>{e.preventDefault();$("#authErr").textContent="";const email=$("#aMail").value.trim(),password=$("#aPass").value;
-  try{if(signup){const j=await sbAuth("signup",{email,password});if(!j.access_token){$("#authErr").textContent=L("checkmail");signup=false;authMode();return}setSes(j)}
+  try{if(signup){const j=await sbAuth("signup?redirect_to="+encodeURIComponent(location.origin+location.pathname),{email,password});if(!j.access_token){$("#authErr").textContent=L("sent").replace("{e}",email);$("#aRe").hidden=false;signup=false;authMode();return}setSes(j)}
    else setSes(await sbAuth("token?grant_type=password",{email,password}));
    $("#auth").hidden=true;$("#aPass").value="";await boot()}catch(er){$("#authErr").textContent=er.message}};
 $("#out").onclick=()=>{setSes(null);S=blank();pend=[];showAuth();render()};
@@ -244,17 +276,21 @@ $("#out").onclick=()=>{setSes(null);S=blank();pend=[];showAuth();render()};
 const esc=t=>t.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 const TAGRE=/(^|\s)#(\p{L}[\p{L}\p{N}_]*)/gu;
 const inl=x=>x.replace(/`([^`\n]+)`/g,"<code>$1</code>").replace(/\*\*([^*\n]+)\*\*/g,"<b>$1</b>").replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g,(m,t,u)=>'<a href="'+u.replace(/"/g,"%22")+'" target="_blank" rel="noopener noreferrer">'+t+"</a>");
-function blocks(p){let o="",l=null,m;const cl=()=>{if(l){o+="</"+l+">";l=null}};
+const cells=r=>r.trim().replace(/^\||\|$/g,"").split("|").map(c=>c.trim());
+function tableHtml(rows){const sep=rows.length>1&&/^[\s:|-]+$/.test(rows[1]),head=sep?cells(rows[0]):null,body=(sep?rows.slice(2):rows).map(cells);
+  return '<div class="tw"><table>'+(head?"<thead><tr>"+head.map(c=>"<th>"+inl(esc(c))+"</th>").join("")+"</tr></thead>":"")+"<tbody>"+body.map(r=>"<tr>"+r.map(c=>"<td>"+inl(esc(c))+"</td>").join("")+"</tr>").join("")+"</tbody></table></div>"}
+function blocks(p){let o="",l=null,m,tb=[];const cl=()=>{if(l){o+="</"+l+">";l=null}},ft=()=>{if(tb.length){o+=tableHtml(tb);tb=[]}};
   for(const ln of p.split("\n")){
+    if(/^\s*\|.+\|\s*$/.test(ln)){cl();tb.push(ln);continue}ft();
     if(m=ln.match(/^(#{1,4})\s+(.*)/)){cl();const n=Math.min(m[1].length+1,5);o+="<h"+n+">"+inl(esc(m[2]))+"</h"+n+">"}
     else if(m=ln.match(/^\s*[-*]\s+(.*)/)){if(l!=="ul"){cl();o+="<ul>";l="ul"}o+="<li>"+inl(esc(m[1]))+"</li>"}
     else if(m=ln.match(/^\s*\d+[.)]\s+(.*)/)){if(l!=="ol"){cl();o+="<ol>";l="ol"}o+="<li>"+inl(esc(m[1]))+"</li>"}
     else{cl();if(ln.trim())o+="<p>"+inl(esc(ln))+"</p>"}}
-  cl();return o}
+  ft();cl();return o}
 function md(t,u){
   return t.split("```").map((p,i)=>{
     if(i%2){const nl=p.indexOf("\n");const body=nl<0?"":p.slice(nl+1);const lang=(nl<0?p:p.slice(0,nl)).trim();const pv=/^html$/i.test(lang)||/<!doctype html|<html/i.test(body);
-      return '<div class="code"><div class="bar">'+(pv?'<button type="button" data-prev>'+L("prev")+'</button>':'')+'<button type="button" data-copy>'+L("copy")+'</button></div><pre>'+esc(body.replace(/\n$/,""))+'</pre></div>'}
+      return '<div class="code" data-lang="'+lang.replace(/[^\w+#.-]/g,"")+'"><div class="bar">'+(pv?'<button type="button" data-prev>'+L("prev")+'</button>':'')+'<button type="button" data-save>↓</button><button type="button" data-copy>'+L("copy")+'</button></div><pre>'+esc(body.replace(/\n$/,""))+'</pre></div>'}
     return u?inl(esc(p).replace(TAGRE,'$1<span class="tag">#$2</span>')).replace(/\n/g,"<br>"):blocks(p);
   }).join("");
 }
@@ -263,18 +299,18 @@ const attHtml=a=>'<div>'+a.map(f=>f.url?'<img class="th" alt="" src="'+f.url+'">
 /* ===== Отрисовка ===== */
 const cur=()=>S.chats.find(c=>c.id===S.cur);
 const proj=id=>S.projects.find(p=>p.id===id);
-function applyLang(){document.documentElement.lang=LANG();document.querySelectorAll("[data-i]").forEach(e=>e.textContent=L(e.dataset.i));$("#in").placeholder=L(imgMode?"imgt":S&&S.view==="proj"?"phproj":"ph");$("#imgb").title=L("imgt");$("#agb").title=L("agt");$("#send").title=L("send");$("#out").title=L("out");$("#out").style.display=SB?"":"none"}
+function applyLang(){document.documentElement.lang=LANG();document.querySelectorAll("[data-i]").forEach(e=>e.textContent=L(e.dataset.i));$("#in").placeholder=L(imgMode?"imgt":S&&S.view==="proj"?"phproj":"ph");$("#imgb").title=L("imgt");$("#agb").title=L("agt");$("#qs").placeholder=L("search");$("#mic").title=L("mic");$("#rsb").title=L("rsb");$("#nPlan").style.display=SB?"":"none";$("#send").title=L("send");$("#out").title=L("out");$("#out").style.display=SB?"":"none"}
 function applyTheme(){const t=S.theme==="auto"?(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"):S.theme;document.documentElement.dataset.theme=t}
-function setView(v,pid){S.view=v;if(pid!==undefined)S.vp=pid;if(v==="chat")NP=null;save();render();$("#side").classList.remove("open")}
+function setView(v,pid){S.view=v;if(v==="plans")refreshUsage();if(pid!==undefined)S.vp=pid;if(v==="chat")NP=null;save();render();$("#side").classList.remove("open")}
 function newChat(pid){S.cur=null;NP=pid||null;S.view="chat";render();$("#side").classList.remove("open");$("#in").focus()}
 function drawList(){const l=$("#list");l.innerHTML="";
-  [...S.chats].sort((a,b)=>(b.updated||0)-(a.updated||0)).forEach(c=>{
+  [...S.chats].filter(c=>{const qv=nrm($("#qs").value.trim());return !qv||nrm(c.title).includes(qv)||c.msgs.some(m=>nrm(m.content||"").includes(qv))}).sort((a,b)=>(b.updated||0)-(a.updated||0)).forEach(c=>{
     const d=document.createElement("div");d.className="chat"+(c.id===S.cur&&S.view==="chat"?" on":"");
     d.innerHTML="<span></span><b title='×'>✕</b>";d.firstChild.textContent=c.title;
     d.onclick=()=>{S.cur=c.id;setView("chat")};
     d.querySelector("b").onclick=e=>{e.stopPropagation();S.chats=S.chats.filter(x=>x.id!==c.id);if(S.cur===c.id)S.cur=null;save();render()};
     l.appendChild(d)});
-  $("#nProj").classList.toggle("on",S.view==="list"||S.view==="proj");
+  $("#nProj").classList.toggle("on",S.view==="list"||S.view==="proj");$("#nPlan").classList.toggle("on",S.view==="plans");
   $("#who").textContent=S.name||(SES?SES.user.email:L("guest"));$("#av").textContent=(S.name||(SES?SES.user.email:"M"))[0].toUpperCase()}
 function greet(){const h=new Date().getHours(),k=h<5?"g4":h<12?"g1":h<18?"g2":"g3",n=S.name||(SES&&SES.user.email.split("@")[0]);return L(k)+(n?", "+n:"")}
 function drawThink(box,m){const t=m.think;
@@ -289,16 +325,21 @@ function startTick(a,t0){clearInterval(tick);tick=setInterval(()=>{if(!a.thinkin
 function rated(){const out=[];S.chats.forEach(c=>c.msgs.forEach((m,i)=>{if(m.role==="assistant"&&m.fb&&m.content&&i>0)out.push({q:c.msgs[i-1].content||"",a:m.content,r:m.fb,n:m.fbn||"",ctx:c.msgs.slice(Math.max(0,i-5),i).map(x=>({role:x.role,content:x.content})),t:c.updated||0})}));return out.sort((a,b)=>b.t-a.t)}
 function rate(m,v){if(m.fb===v){delete m.fb;delete m.fbn}else{m.fb=v;if(v===-1){const n=prompt(L("fbwhy"),m.fbn||"");if(n!==null)m.fbn=n.trim()}else delete m.fbn}save();render()}
 function undoMem(m){const k=m.mem||[];S.memory=(S.memory||"").split("\n").filter(l=>!k.includes(l.replace(/^•\s*/,""))).join("\n");delete m.mem;save();render()}
-function fbRow(m){const fb=el$("div","fb"),up=el$("button","ic"+(m.fb===1?" on":""),"👍"),dn=el$("button","ic"+(m.fb===-1?" on":""),"👎");
+function fbRow(m){const fb=el$("div","fb");
+  if(m.lim){const b=el$("button","btn",L("plans"));b.onclick=()=>setView("plans");fb.appendChild(b);return fb}
+  const up=el$("button","ic"+(m.fb===1?" on":""),"👍"),dn=el$("button","ic"+(m.fb===-1?" on":""),"👎");
   up.onclick=()=>rate(m,1);dn.onclick=()=>rate(m,-1);fb.append(up,dn);
+  const c=cur();if(c&&c.msgs[c.msgs.length-1]===m){const rg=el$("button","ic","↻");rg.title=L("regen");rg.onclick=regen;fb.appendChild(rg)}
+  if(window.speechSynthesis){const sp=el$("button","ic","🔊");sp.title=L("speak");sp.onclick=()=>speak(m,sp);fb.appendChild(sp)}
+  const fl=el$("button","ic","⬇");fl.title=L("file");fl.onclick=e=>{e.stopPropagation();fileMenu(fl,m)};fb.appendChild(fl);
   if(m.mem&&m.mem.length){const ch=el$("span","memchip","🧠 "+L("remembered")+": "+m.mem.join("; ")+" "),un=el$("button","lnk",L("undo"));un.onclick=()=>undoMem(m);ch.appendChild(un);fb.appendChild(ch)}
   return fb}
 function drawMsgs(){const c=cur(),w=$("#wrap");
   if(!c||!c.msgs.length){const p=NP&&proj(NP);w.innerHTML='<div id="empty"><h1></h1><p></p></div>';w.querySelector("h1").textContent=greet();w.querySelector("p").textContent=p?p.name:L("tag");return}
   w.innerHTML="";
-  c.msgs.forEach(m=>{
+  c.msgs.forEach((m,i)=>{
     const d=document.createElement("div");d.className="m "+(m.role==="user"?"u":"a");
-    if(m.role==="user"){d.innerHTML='<div class="bub"></div>';const bub=d.firstChild;bub.innerHTML=md(m.content,true);if(m.att&&m.att.length)bub.insertAdjacentHTML("afterbegin",attHtml(m.att))}
+    if(m.role==="user"){d.innerHTML='<div class="bub"></div>';const bub=d.firstChild;bub.innerHTML=md(m.content,true);if(m.att&&m.att.length)bub.insertAdjacentHTML("afterbegin",attHtml(m.att));const ua=el$("div","ua"),eb=el$("button","ic","✎");eb.title=L("edit");eb.onclick=()=>editMsg(i);ua.appendChild(eb);d.appendChild(ua)}
     else{
       d.innerHTML='<small>Mark AI</small><div class="bub"><div class="tk"></div><div class="ans"></div></div>';
       drawThink(d.querySelector(".tk"),m);const an=d.querySelector(".ans");
@@ -311,6 +352,7 @@ const KACC=".txt,.md,.json,.csv,.js,.ts,.py,.html,.css,.java,.c,.cpp,.cs,.lua,.l
 function drawPV(){const el=$("#pview");
   if(S.view==="chat"){el.innerHTML="";return}
   if(S.view==="acc"){drawAcc(el);return}
+  if(S.view==="plans"){drawPlans(el);return}
   if(S.view==="list"){
     el.innerHTML='<div class="pg"><div class="rowh"><h2></h2><button class="btn pri" id="np"></button></div><div class="grid"></div></div>';
     el.querySelector("h2").textContent=L("projects");$("#np").textContent="＋ "+L("newproj");
@@ -365,14 +407,121 @@ function drawAcc(root){
   const ta=el$("textarea");ta.rows=4;ta.value=S.sys;ta.oninput=()=>{S.sys=ta.value.trim()||DEF_SYS;save()};fld(x,L("sys"),ta);
   if(!SB){const t=el$("input");t.type="password";t.value=S.token||"";t.oninput=()=>{S.token=t.value.trim();save()};fld(x,L("tok"),t)}
   x=sec(L("mem"));x.appendChild(el$("small","",L("memh")));const mt=el$("textarea");mt.rows=4;mt.value=S.memory||"";mt.oninput=()=>{S.memory=mt.value;save()};x.appendChild(mt);
+  x=sec(L("ctags"));{const lst=el$("div");lst.style.cssText="display:flex;flex-direction:column;gap:6px";x.appendChild(lst);
+    const dr=()=>{lst.textContent="";(S.ctags||[]).forEach((t,i)=>{const r=el$("div","kf");r.appendChild(el$("span","","#"+t.n+" — "+t.i));const b=el$("b","ic","✕");b.onclick=()=>{S.ctags.splice(i,1);save();dr()};r.appendChild(b);lst.appendChild(r)})};dr();
+    const tn=el$("input"),ti=el$("input"),ba=el$("button","btn",L("ctadd"));tn.placeholder=L("ctn");ti.placeholder=L("cti");
+    ba.onclick=()=>{const n=nrm(tn.value.replace(/^#/,"").replace(/\s+/g,"")),v=ti.value.trim();if(!/^\p{L}[\p{L}\p{N}_]*$/u.test(n)||!v)return;S.ctags=(S.ctags||[]).filter(t=>t.n!==n);S.ctags.unshift({n,i:v});tn.value=ti.value="";save();dr()};
+    x.append(tn,ti,ba)}
+  x=sec(L("app"));{const st=matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+    if(st)x.appendChild(el$("small","",L("installed")));
+    else if(deferredInstall){const bi=el$("button","btn",L("install"));bi.onclick=()=>{deferredInstall.prompt();deferredInstall=null;bi.remove()};x.appendChild(bi)}
+    else x.appendChild(el$("small","",L("iosHint")))}
   x=sec(L("data"));{const r=rated();x.appendChild(el$("small","",L("rated")+": 👍 "+r.filter(e=>e.r===1).length+" · 👎 "+r.filter(e=>e.r===-1).length))}const bar=el$("div","acts"),bx=el$("button","btn",L("export")),bc=el$("button","btn",L("clearall"));
   bx.onclick=exportData;bc.onclick=()=>{if(confirm(L("clearq"))){S.chats=[];S.cur=null;save();render()}};const bd=el$("button","btn",L("dset"));bd.onclick=exportDataset;bar.append(bx,bd,bc);
   if(SB){const bo=el$("button","btn",L("out"));bo.onclick=()=>$("#out").click();bar.append(bo)}x.appendChild(bar)}
+/* ===== Тарифы и лимиты ===== */
+let USG=null;
+const PLANS=[{id:"basic",name:"Basic",price:0,uses:30,img:10},{id:"plus",name:"Plus",price:3,uses:50,img:20},{id:"pro",name:"Pro",price:7,uses:70,img:25},{id:"programmer",name:"Programmer",price:15,uses:80,img:30}];
+const fmtReset=t=>{if(!t)return"—";const m=Math.max(1,Math.round((new Date(t)-Date.now())/60000));return m>=60?Math.floor(m/60)+" "+L("h")+" "+(m%60)+" "+L("min"):m+" "+L("min")};
+async function refreshUsage(){if(!SB||!SES)return;try{const r=await fetch(SB_URL+"/rest/v1/rpc/consume",{method:"POST",headers:sbh(await token()),body:JSON.stringify({kind:"peek",cost:0})});if(r.ok){const j=await r.json();if(j&&j.tier)USG=j}}catch(e){}drawMeter();if(S.view==="plans")drawPV()}
+function usageBars(p,u){const row=(label,a,b)=>{p.appendChild(el$("b","",label+" "+a+"/"+b));const bar=el$("div","bar2"),i=document.createElement("i");i.style.width=Math.min(100,b?a/b*100:0)+"%";bar.appendChild(i);p.appendChild(bar)};
+  row(L("meterUse"),u.uses,u.max_uses);row(L("meterImg"),u.images,u.max_images);p.appendChild(el$("div","",L("resetIn")+" "+fmtReset(u.reset_at)))}
+function drawMeter(){const m=$("#meter");if(!USG||!SB){m.style.display="none";return}m.style.display="block";m.textContent="";m.appendChild(el$("div","",(PLANS.find(p=>p.id===USG.tier)||{}).name||USG.tier));usageBars(m,USG)}
+function drawPlans(el){el.innerHTML="";const pg=el$("div","pg");el.appendChild(pg);pg.appendChild(el$("h2","",L("plansTitle")));
+  const cu=(USG&&USG.tier)||"basic";if(USG){const b=el$("div","sec");usageBars(b,USG);pg.appendChild(b)}
+  const g=el$("div","plans");pg.appendChild(g);
+  PLANS.forEach(p=>{const c=el$("div","plan"+(p.id===cu?" cur":""));c.appendChild(el$("h3","",p.name));
+    const pr=el$("div","pr",p.price?"$"+p.price:L("free"));if(p.price)pr.appendChild(el$("small","","  "+L("perMonth")));c.appendChild(pr);
+    const ul=el$("ul");[p.uses+" "+L("meterUse")+" / 5 "+L("h"),p.img+" "+L("meterImg")+" / 5 "+L("h"),L("pl_"+p.id)].forEach(t=>ul.appendChild(el$("li","",t)));c.appendChild(ul);
+    const b=el$("button","btn"+(p.id===cu?"":" pri"),p.id===cu?L("curPlan"):L("choose"));b.disabled=p.id===cu;if(p.id==="basic"&&cu!=="basic")b.style.display="none";
+    b.onclick=()=>{const l=PLAN_LINKS[p.id];if(l)window.open(l+(l.includes("?")?"&":"?")+"email="+encodeURIComponent(SES?SES.user.email:""),"_blank");else alert(L("payLater"))};c.appendChild(b);g.appendChild(c)});
+  pg.appendChild(el$("small","",L("plcost")))}
+async function failResp(r){const t=await r.text();let j=null;try{j=JSON.parse(t)}catch(e){}
+  if(j&&j.error==="limit"){USG=j;drawMeter();const e=new Error(L("limitMsg").replace("{t}",fmtReset(j.reset_at)));e.soft=true;throw e}
+  if(j&&j.error==="tier"){const e=new Error(L("tierMsg").replace("{p}",(PLANS.find(p=>p.id===j.need)||{}).name||j.need));e.soft=true;throw e}
+  throw new Error(r.status+(t?" — "+t.slice(0,300):""))}
+
+/* ===== Повтор и правка ===== */
+function regen(){const c=cur();if(!c||busy)return;const i=c.msgs.length-1;if(i<1||c.msgs[i].role!=="assistant")return;const u=c.msgs[i-1];c.msgs.splice(i-1,2);pend=(u.att||[]).filter(f=>f.data);showChips();save();send(u.content==="📎"?"":u.content)}
+function editMsg(i){const c=cur();if(!c||busy)return;const m=c.msgs[i];$("#in").value=m.content==="📎"?"":m.content;pend=(m.att||[]).filter(f=>f.data);showChips();c.msgs.splice(i);save();render();$("#in").focus();$("#in").dispatchEvent(new Event("input"))}
+
+/* ===== Голос ===== */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition,VL={ru:"ru-RU",en:"en-US",az:"az-AZ",tr:"tr-TR",de:"de-DE"};let rec=null,spk=null;
+function toggleMic(){if(!SR)return;if(rec){rec.stop();return}
+  rec=new SR();rec.lang=VL[S.lang]||navigator.language||"ru-RU";rec.interimResults=true;rec.continuous=true;const base=$("#in").value;let fin="";
+  rec.onresult=e=>{let tmp="";for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)fin+=r[0].transcript+" ";else tmp+=r[0].transcript}$("#in").value=(base?base+" ":"")+fin+tmp;$("#in").dispatchEvent(new Event("input"))};
+  rec.onend=()=>{rec=null;$("#mic").classList.remove("on")};rec.onerror=()=>{};rec.start();$("#mic").classList.add("on")}
+const plain=t=>t.replace(/```[\s\S]*?```/g," ").replace(/\[([^\]]+)\]\(([^)]+)\)/g,"$1").replace(/^\s*#{1,6}\s+/gm,"").replace(/\*\*|__|`/g,"").replace(/^\s*[-*]\s+/gm,"• ").replace(/\|/g," ").replace(/[ \t]+/g," ").trim();
+function speak(m,btn){const ss=window.speechSynthesis;if(!ss)return;const was=spk;ss.cancel();document.querySelectorAll(".fb .ic").forEach(b=>{if(b.textContent==="⏹")b.textContent="🔊"});spk=null;if(was===m)return;
+  const text=plain(m.content).slice(0,4000);if(!text)return;const u=new SpeechSynthesisUtterance(text);
+  u.lang=VL[S.lang]||(/[а-яё]/i.test(text)?"ru-RU":"en-US");const v=ss.getVoices().find(x=>x.lang.toLowerCase().startsWith(u.lang.slice(0,2)));if(v)u.voice=v;
+  u.onend=u.onerror=()=>{spk=null;btn.textContent="🔊"};spk=m;btn.textContent="⏹";ss.speak(u)}
+
+/* ===== Свои хештеги и установка ===== */
+function usedTags(text){const o={};for(const m of text.matchAll(/(?:^|\s)#(\p{L}[\p{L}\p{N}_]*)/gu)){const n=nrm(m[1]),t=(S.ctags||[]).find(x=>x.n===n);if(t)o[n]=t.i}return o}
+const ctagDesc=k=>((S.ctags||[]).find(t=>t.n===k)||{}).i;
+let deferredInstall=null;addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstall=e});
+
+/* ===== Создание файлов ===== */
+const EXT={python:"py",py:"py",javascript:"js",js:"js",typescript:"ts",ts:"ts",html:"html",css:"css",json:"json",lua:"lua",luau:"lua",java:"java",c:"c",cpp:"cpp","c++":"cpp",csharp:"cs",cs:"cs","c#":"cs",sql:"sql",bash:"sh",sh:"sh",xml:"xml",yaml:"yml",yml:"yml",md:"md",markdown:"md",php:"php",go:"go",rust:"rs",kotlin:"kt",swift:"swift"};
+const loadJSZip=()=>window.JSZip?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";s.onload=ok;s.onerror=no;document.head.appendChild(s)});
+const xe=s=>String(s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const strip=s=>s.replace(/\[([^\]]+)\]\(([^)]+)\)/g,"$1 ($2)");
+function parseMd(text){const out=[];text.split("```").forEach((seg,i)=>{
+  if(i%2){const nl=seg.indexOf("\n");out.push({t:"code",x:(nl<0?"":seg.slice(nl+1)).replace(/\n$/,"")});return}
+  let tb=[];const ft=()=>{if(tb.length){const sep=tb.length>1&&/^[\s:|-]+$/.test(tb[1]);out.push({t:"table",head:sep,rows:(sep?[tb[0],...tb.slice(2)]:tb).map(cells)});tb=[]}};
+  for(const ln of seg.split("\n")){let m;
+    if(/^\s*\|.+\|\s*$/.test(ln)){tb.push(ln);continue}ft();
+    if(m=ln.match(/^(#{1,4})\s+(.*)/))out.push({t:"h",n:m[1].length,x:m[2]});
+    else if(m=ln.match(/^\s*[-*]\s+(.*)/))out.push({t:"li",x:m[1]});
+    else if(m=ln.match(/^\s*(\d+)[.)]\s+(.*)/))out.push({t:"li",x:m[2],n:m[1]});
+    else if(ln.trim())out.push({t:"p",x:ln})}
+  ft()});return out}
+function runs(s,base){base=base||{};return strip(s).split(/(\*\*[^*]+\*\*|`[^`]+`)/).filter(Boolean).map(p=>{let b=base.b,mono=false,t=p;if(/^\*\*.+\*\*$/.test(p)){b=true;t=p.slice(2,-2)}else if(/^`.+`$/.test(p)){mono=true;t=p.slice(1,-1)}
+  return '<w:r><w:rPr>'+(mono?'<w:rFonts w:ascii="Consolas" w:hAnsi="Consolas" w:cs="Consolas"/>':'')+(b?'<w:b/>':'')+(base.sz?'<w:sz w:val="'+base.sz+'"/>':'')+(mono?'<w:shd w:val="clear" w:color="auto" w:fill="EEEEF5"/>':'')+'</w:rPr><w:t xml:space="preserve">'+xe(t)+'</w:t></w:r>'}).join("")}
+async function mkDocx(text){await loadJSZip();
+  const body=parseMd(text).map(b=>{
+    if(b.t==="h")return'<w:p><w:pPr><w:spacing w:before="240" w:after="80"/></w:pPr>'+runs(b.x,{b:true,sz:[0,36,30,26,24][b.n]||24})+'</w:p>';
+    if(b.t==="li")return'<w:p><w:pPr><w:ind w:left="540" w:hanging="270"/></w:pPr>'+runs((b.n?b.n+". ":"• ")+b.x)+'</w:p>';
+    if(b.t==="code")return b.x.split("\n").map(l=>'<w:p><w:pPr><w:shd w:val="clear" w:color="auto" w:fill="F2F2F7"/><w:spacing w:after="0"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Consolas" w:hAnsi="Consolas" w:cs="Consolas"/><w:sz w:val="20"/></w:rPr><w:t xml:space="preserve">'+xe(l)+'</w:t></w:r></w:p>').join("")+'<w:p/>';
+    if(b.t==="table"){const n=Math.max(...b.rows.map(r=>r.length)),w=Math.floor(9000/n);
+      const bd='<w:tblBorders>'+["top","left","bottom","right","insideH","insideV"].map(k=>'<w:'+k+' w:val="single" w:sz="4" w:space="0" w:color="BBBBBB"/>').join("")+'</w:tblBorders>';
+      return'<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/>'+bd+'</w:tblPr><w:tblGrid>'+('<w:gridCol w:w="'+w+'"/>').repeat(n)+'</w:tblGrid>'+b.rows.map((r,ri)=>'<w:tr>'+Array.from({length:n},(_,ci)=>'<w:tc><w:tcPr><w:tcW w:w="'+w+'" w:type="dxa"/>'+(b.head&&ri===0?'<w:shd w:val="clear" w:color="auto" w:fill="E6E6FA"/>':'')+'</w:tcPr><w:p>'+runs(r[ci]||"",{b:b.head&&ri===0})+'</w:p></w:tc>').join("")+'</w:tr>').join("")+'</w:tbl><w:p/>'}
+    return'<w:p>'+runs(b.x)+'</w:p>'}).join("");
+  const H='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',W='xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"',R="http://schemas.openxmlformats.org/officeDocument/2006/relationships",z=new JSZip();
+  z.file("[Content_Types].xml",H+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>');
+  z.file("_rels/.rels",H+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="'+R+'/officeDocument" Target="word/document.xml"/></Relationships>');
+  z.file("word/_rels/document.xml.rels",H+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="'+R+'/styles" Target="styles.xml"/></Relationships>');
+  z.file("word/styles.xml",H+'<w:styles '+W+'><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri" w:eastAsia="Calibri"/><w:sz w:val="22"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="120" w:line="276" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults></w:styles>');
+  z.file("word/document.xml",H+'<w:document '+W+'><w:body>'+body+'<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr></w:body></w:document>');
+  dl(await z.generateAsync({type:"uint8array"}),"mark-ai.docx","application/vnd.openxmlformats-officedocument.wordprocessingml.document")}
+const colN=n=>{let s="";n++;while(n>0){const r=(n-1)%26;s=String.fromCharCode(65+r)+s;n=Math.floor((n-1)/26)}return s};
+async function mkXlsx(text){const tbs=parseMd(text).filter(b=>b.t==="table");if(!tbs.length)return;await loadJSZip();
+  const H='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',N='xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"',R="http://schemas.openxmlformats.org/officeDocument/2006/relationships",z=new JSZip();
+  const cell=(v,r,c,hd)=>{v=strip(String(v==null?"":v)).replace(/\*\*|`/g,"");const ref=colN(c)+(r+1);
+    return /^-?\d+([.,]\d+)?$/.test(v.trim())?'<c r="'+ref+'"><v>'+v.trim().replace(",",".")+'</v></c>':'<c r="'+ref+'" t="inlineStr"'+(hd?' s="1"':'')+'><is><t xml:space="preserve">'+xe(v)+'</t></is></c>'};
+  tbs.forEach((t,i)=>z.file("xl/worksheets/sheet"+(i+1)+".xml",H+'<worksheet '+N+'><sheetData>'+t.rows.map((r,ri)=>'<row r="'+(ri+1)+'">'+r.map((v,ci)=>cell(v,ri,ci,t.head&&ri===0)).join("")+'</row>').join("")+'</sheetData></worksheet>'));
+  z.file("[Content_Types].xml",H+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'+tbs.map((_,i)=>'<Override PartName="/xl/worksheets/sheet'+(i+1)+'.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>').join("")+'</Types>');
+  z.file("_rels/.rels",H+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="'+R+'/officeDocument" Target="xl/workbook.xml"/></Relationships>');
+  z.file("xl/workbook.xml",H+'<workbook '+N+' xmlns:r="'+R+'"><sheets>'+tbs.map((_,i)=>'<sheet name="'+L("sheet")+" "+(i+1)+'" sheetId="'+(i+1)+'" r:id="rId'+(i+1)+'"/>').join("")+'</sheets></workbook>');
+  z.file("xl/_rels/workbook.xml.rels",H+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+tbs.map((_,i)=>'<Relationship Id="rId'+(i+1)+'" Type="'+R+'/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>').join("")+'<Relationship Id="rId'+(tbs.length+1)+'" Type="'+R+'/styles" Target="styles.xml"/></Relationships>');
+  z.file("xl/styles.xml",H+'<styleSheet '+N+'><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs></styleSheet>');
+  dl(await z.generateAsync({type:"uint8array"}),"mark-ai.xlsx","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}
+function mkPdf(text){const f=document.createElement("iframe");f.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0";document.body.appendChild(f);
+  const d=f.contentWindow.document;d.open();d.write('<!doctype html><html><head><meta charset="utf-8"><title>Mark AI</title><style>body{font:14px/1.6 "Segoe UI",Arial,sans-serif;margin:24px;color:#111}.bar{display:none}.code{border:1px solid #ddd;border-radius:6px;margin:8px 0}pre{margin:0;padding:10px;white-space:pre-wrap;background:#f3f3f7}code{background:#f3f3f7;padding:1px 4px;border-radius:4px}table{border-collapse:collapse}td,th{border:1px solid #bbb;padding:5px 9px}a{color:#2b4bd6}</style></head><body>'+md(text,false)+'</body></html>');d.close();
+  setTimeout(()=>{f.contentWindow.focus();f.contentWindow.print();setTimeout(()=>f.remove(),2000)},300)}
+function fileMenu(btn,m){document.querySelectorAll(".menu").forEach(x=>x.remove());const mn=el$("div","menu");
+  const items=[["fWord",()=>mkDocx(m.content)],["fPdf",()=>mkPdf(m.content)],["fMd",()=>dl(m.content,"mark-ai.md","text/markdown")],["fTxt",()=>dl(m.content.replace(/```[^\n]*\n?/g,"").replace(/\[([^\]]+)\]\(([^)]+)\)/g,"$1 ($2)").replace(/^\s*#{1,6}\s+/gm,"").replace(/\*\*|`/g,""),"mark-ai.txt","text/plain")]];
+  if(parseMd(m.content).some(b=>b.t==="table"))items.splice(2,0,["fXls",()=>mkXlsx(m.content)]);
+  items.forEach(([k,fn])=>{const b=el$("button","",L(k));b.onclick=()=>{mn.remove();fn()};mn.appendChild(b)});
+  document.body.appendChild(mn);const r=btn.getBoundingClientRect();mn.style.left=Math.max(8,Math.min(r.left,innerWidth-190))+"px";mn.style.top=Math.max(8,Math.min(r.bottom+4,innerHeight-mn.offsetHeight-8))+"px";
+  setTimeout(()=>document.addEventListener("click",()=>mn.remove(),{once:true}),0)}
+
 function render(){
   applyTheme();applyLang();
   const main=$("#main");main.dataset.v=S.view;
   main.classList.toggle("empty",S.view==="chat"&&!(cur()&&cur().msgs.length));
-  $("#ttl").textContent=S.view==="acc"?L("account"):S.view==="list"?L("projects"):S.view==="proj"?(proj(S.vp)||{}).name||"":(cur()?cur().title:"");
+  $("#ttl").textContent=S.view==="plans"?L("plans"):S.view==="acc"?L("account"):S.view==="list"?L("projects"):S.view==="proj"?(proj(S.vp)||{}).name||"":(cur()?cur().title:"");
   drawList();drawMsgs();drawPV()}
 
 /* ===== Отправка ===== */
@@ -396,26 +545,27 @@ async function send(text){
   c.updated=Date.now();
   const a={role:"assistant",content:"",live:true},t0=Date.now();
   if(wantImg){a.kind="img";a.w="imgwait"}else{a.think={ms:0,steps:[],th:""};a.thinking=true;startTick(a,t0)}
-  c.msgs.push(a);const think=agentMode?"agent":(S.think||"auto");agentMode=false;$("#agb").classList.remove("on");
+  c.msgs.push(a);const think=researchMode?"research":agentMode?"agent":(S.think||"auto");agentMode=false;researchMode=false;$("#agb").classList.remove("on");$("#rsb").classList.remove("on");
   let fail="",ok=true;
-  busy=true;$("#send").disabled=true;save();render();
+  busy=true;$("#send").textContent="■";save();render();
   const upd=()=>{const w=$("#wrap").lastElementChild;if(!w||!w.querySelector(".ans"))return;drawThink(w.querySelector(".tk"),a);
     w.querySelector(".ans").innerHTML=md(a.content||(a.think&&(a.think.steps.length||a.think.th)?"":L(a.w||"wait")),false);$("#msgs").scrollTop=1e9};
   try{
     ctrl=new AbortController();
     if(a.kind==="img"){
       const r=await fetch(WORKER,{method:"POST",signal:ctrl.signal,headers:await hdr(),body:JSON.stringify({mode:"image",prompt:text,files:apiMsg(c.msgs[c.msgs.length-2]).files.filter(f=>f.kind==="img")})});
-      if(!r.ok){const t=await r.text();throw new Error(r.status+(t?" — "+t.slice(0,300):""))}
-      const j=await r.json();a.img=j.image;a.content="🖼 "+text.slice(0,80);
+      if(!r.ok)await failResp(r);
+      const j=await r.json();a.img=j.image;a.content="🖼 "+text.slice(0,80);if(j.usage){USG=j.usage;drawMeter()}
     }else{
-      const r=await fetch(WORKER,{method:"POST",signal:ctrl.signal,headers:await hdr(),body:JSON.stringify({mode:"merge",lang:S.lang||"auto",think,web:S.web||"auto",system:sysFor(c),messages:c.msgs.slice(0,-1).map(apiMsg)})});
-      if(!r.ok){const t=await r.text();throw new Error(r.status+(t?" — "+t.slice(0,300):""))}
+      const r=await fetch(WORKER,{method:"POST",signal:ctrl.signal,headers:await hdr(),body:JSON.stringify({mode:"merge",lang:S.lang||"auto",think,web:S.web||"auto",ctags:usedTags(text),system:sysFor(c),messages:c.msgs.slice(0,-1).map(apiMsg)})});
+      if(!r.ok)await failResp(r);
       const T=a.think,lastS=()=>T.steps[T.steps.length-1],closeS=()=>{const x=lastS();if(x&&!x.done){x.done=true;x.ms=Date.now()-x.t0}};
       const ev=o=>{
         if(o.t==="step"){closeS();T.steps.push({label:o.label,detail:o.detail||"",t0:Date.now()})}
         else if(o.t==="detail"){const x=lastS();if(x)x.detail=(x.detail?x.detail+"\n":"")+o.d}
         else if(o.t==="thought")T.th=((T.th||"")+o.d).slice(0,4000);
         else if(o.t==="text"){if(a.thinking){closeS();a.thinking=false;T.ms=Date.now()-t0;clearInterval(tick)}a.content+=o.d}
+        else if(o.t==="usage"){USG=o;drawMeter()}
         else if(o.t==="error")fail=o.m;
         upd()};
       let nd=(r.headers.get("content-type")||"").includes("ndjson"),first=true;const rd=r.body.getReader(),dec=new TextDecoder();let buf="";
@@ -425,11 +575,11 @@ async function send(text){
         buf+=ch;let i;while((i=buf.indexOf("\n"))>=0){const ln=buf.slice(0,i);buf=buf.slice(i+1);if(ln.trim()){try{ev(JSON.parse(ln))}catch(e){}}}}
       if(fail)throw new Error(fail);
     }
-  }catch(e){ok=false;if(e.name!=="AbortError")a.content+=(a.content?"\n\n":"")+L("err")+": "+e.message+"\n\n"+L("chk")}
+  }catch(e){ok=false;if(e.name==="AbortError"){if(!a.content&&!a.img)a.content=L("stopped")}else if(e.soft){a.content=e.message;a.lim=true}else a.content+=(a.content?"\n\n":"")+L("err")+": "+e.message+"\n\n"+L("chk")}
   clearInterval(tick);
   if(a.think){a.thinking=false;if(!a.think.ms)a.think.ms=Date.now()-t0;const x=a.think.steps[a.think.steps.length-1];if(x&&!x.done){x.done=true;x.ms=Date.now()-x.t0}}
   if(a.kind==="img"&&!a.img)delete a.kind;
-  a.live=false;busy=false;ctrl=null;$("#send").disabled=false;c.updated=Date.now();save();render();
+  a.live=false;busy=false;ctrl=null;$("#send").textContent="↑";c.updated=Date.now();save();render();
   if(ok&&!a.kind&&a.content)autoMemory(a,text)}
 const PERS=/(^|\s)(я |мой|моя|моё|мои|мне |меня |люблю|работаю|учусь|хочу|планирую|делаю|создаю|запомни|i am|i'm|my |i like|i work|remember)/i;
 async function autoMemory(a,text){if(S.automem==="off"||text.length<15||!PERS.test(text))return;
@@ -456,25 +606,29 @@ const NAMES="кратко подробно обширно максимально
 const nrm=s=>s.toLowerCase().replace(/ё/g,"е");
 async function loadTags(){TAGS={};try{const u=new URL(WORKER);u.searchParams.set("tags","1");const r=await fetch(u);TAGS=await r.json();if(!Object.keys(TAGS).length)throw 0}catch(e){TAGS={};NAMES.forEach(k=>TAGS[k]="")}}
 function hint(){const el=$("#in"),m=el.value.slice(0,el.selectionStart).match(/(^|\s)#([\p{L}\p{N}_]*)$/u);cand=[];
-  if(m){const q=nrm(m[2]);cand=Object.keys(TAGS).filter(k=>nrm(k).startsWith(q)).slice(0,8)}
+  if(m){const q=nrm(m[2]);cand=[...new Set([...(S.ctags||[]).map(t=>t.n),...Object.keys(TAGS)])].filter(k=>nrm(k).startsWith(q)).slice(0,8)}
   sel=0;showHint()}
 function showHint(){const t=$("#tg");if(!cand.length){t.style.display="none";return}
-  t.innerHTML="";cand.forEach((k,i)=>{const d=document.createElement("div");d.className="it"+(i===sel?" on":"");d.innerHTML="<b></b><small></small>";d.firstChild.textContent="#"+k;d.lastChild.textContent=TAGS[k];d.onmousedown=e=>{e.preventDefault();pickTag(k)};t.appendChild(d)});t.style.display="block"}
+  t.innerHTML="";cand.forEach((k,i)=>{const d=document.createElement("div");d.className="it"+(i===sel?" on":"");d.innerHTML="<b></b><small></small>";d.firstChild.textContent="#"+k;d.lastChild.textContent=ctagDesc(k)||TAGS[k]||"";d.onmousedown=e=>{e.preventDefault();pickTag(k)};t.appendChild(d)});t.style.display="block"}
 function pickTag(k){const el=$("#in"),pos=el.selectionStart,b=el.value.slice(0,pos).replace(/#([\p{L}\p{N}_]*)$/u,"#"+k+" ");el.value=b+el.value.slice(pos);el.selectionStart=el.selectionEnd=b.length;cand=[];showHint();el.focus()}
 
 /* ===== События ===== */
-$("#comp").onsubmit=e=>{e.preventDefault();const t=$("#in").value;cand=[];showHint();$("#in").value="";$("#in").style.height="auto";send(t)};
+$("#comp").onsubmit=e=>{e.preventDefault();if(busy){if(ctrl)ctrl.abort();return}const t=$("#in").value;cand=[];showHint();$("#in").value="";$("#in").style.height="auto";send(t)};
 $("#in").onkeydown=e=>{if(cand.length){
   if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();sel=(sel+(e.key==="ArrowDown"?1:-1)+cand.length)%cand.length;showHint();return}
   if(e.key==="Tab"||e.key==="Enter"){e.preventDefault();pickTag(cand[sel]);return}
   if(e.key==="Escape"){cand=[];showHint();return}}
-  if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();$("#comp").requestSubmit()}};
+  if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();if(!busy)$("#comp").requestSubmit()}};
 $("#in").oninput=e=>{hint();e.target.style.height="auto";e.target.style.height=Math.min(e.target.scrollHeight,220)+"px"};
 $("#in").addEventListener("paste",e=>{const fs=[...(e.clipboardData?.files||[])];if(fs.length){e.preventDefault();addFiles(fs)}});
 $("#att").onclick=()=>$("#fi").click();
 $("#fi").onchange=e=>{addFiles([...e.target.files]);e.target.value=""};
 $("#imgb").onclick=()=>{imgMode=!imgMode;$("#imgb").classList.toggle("on",imgMode);applyLang();$("#in").focus()};
 $("#agb").onclick=()=>{agentMode=!agentMode;$("#agb").classList.toggle("on",agentMode);$("#in").focus()};
+$("#rsb").onclick=()=>{researchMode=!researchMode;$("#rsb").classList.toggle("on",researchMode);if(researchMode){agentMode=false;$("#agb").classList.remove("on")}$("#in").focus()};
+$("#mic").onclick=toggleMic;if(!SR)$("#mic").style.display="none";
+$("#nPlan").onclick=()=>setView("plans");$("#meter").onclick=()=>setView("plans");
+$("#qs").oninput=()=>drawList();
 $("#nNew").onclick=()=>newChat();
 $("#nProj").onclick=()=>setView("list");
 $("#tog").onclick=()=>{const s=$("#side");matchMedia("(max-width:760px)").matches?s.classList.toggle("open"):s.classList.toggle("hide")};
@@ -483,16 +637,18 @@ $("#av").onclick=$("#who").onclick=()=>setView("acc");
 $("#aG").onclick=()=>{location.href=SB_URL+"/auth/v1/authorize?provider=google&redirect_to="+encodeURIComponent(location.origin+location.pathname)};
 $("#wrap").onclick=e=>{
   const p=e.target.closest("[data-prev]");if(p){PV=p.closest(".code").querySelector("pre").textContent;$("#pvf").srcdoc=PV;$("#pv").showModal();return}
+  const sv=e.target.closest("[data-save]");if(sv){const cd=sv.closest(".code");dl(cd.querySelector("pre").textContent,"code."+(EXT[(cd.dataset.lang||"").toLowerCase()]||"txt"),"text/plain");return}
   const b=e.target.closest("[data-copy]");if(b){navigator.clipboard.writeText(b.closest(".code").querySelector("pre").textContent);b.textContent=L("copied");setTimeout(()=>b.textContent=L("copy"),1200)}};
 $("#pvX").onclick=()=>{$("#pv").close();$("#pvf").srcdoc=""};
 $("#pvDl").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([PV],{type:"text/html"}));a.download="index.html";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
 
 /* ===== Старт ===== */
-async function oauthReturn(){const h=location.hash;if(!/access_token=|error_description=/.test(h))return"";const p=new URLSearchParams(h.slice(1));history.replaceState(null,"",location.pathname+location.search);
+async function oauthReturn(){const h=location.hash;if(!/access_token=|error_description=/.test(h))return"";const p=new URLSearchParams(h.slice(1));if(p.get("type")==="recovery")RECOV=true;history.replaceState(null,"",location.pathname+location.search);
   if(p.get("error_description"))return p.get("error_description");
   try{const t=p.get("access_token"),r=await fetch(SB_URL+"/auth/v1/user",{headers:sbh(t)});setSes({access_token:t,refresh_token:p.get("refresh_token"),expires_in:+p.get("expires_in")||3600,user:await r.json()})}catch(e){return e.message}return""}
+if("serviceWorker"in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
 S=blank();
-(async()=>{const err=SB?await oauthReturn():"";if(SB&&!SES){showAuth();$("#authErr").textContent=err;render()}else boot()})();
+(async()=>{const err=SB?await oauthReturn():"";if(SB&&!SES){showAuth();$("#authErr").textContent=err;render()}else{await boot();if(RECOV){setView("acc");setTimeout(()=>alert(L("setnew")),200)}}})();
 </script>
 </body>
 </html>
