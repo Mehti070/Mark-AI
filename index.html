@@ -146,6 +146,7 @@ dialog textarea{min-height:110px;resize:vertical}
 @media(hover:none){.ua{opacity:1}}
 .menu{position:fixed;z-index:30;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.25);display:flex;flex-direction:column;min-width:170px}
 .menu button{background:none;border:0;text-align:left;padding:7px 12px;border-radius:8px}.menu button:hover{background:var(--acc2)}
+#rk{width:min(980px,96vw);max-height:90vh;overflow:auto}.rkh{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.rkh h3{margin:0}.rknote{display:block;margin:0 0 10px;color:var(--mute);font-size:13px}
 .tw{overflow-x:auto;margin:.5em 0}.bub table{border-collapse:collapse}.bub th,.bub td{border:1px solid var(--line);padding:6px 10px;text-align:left}.bub th{background:var(--acc2)}
 @media(max-width:760px){
  #side{position:fixed;inset:0 auto 0 0;z-index:5;margin:0!important;transform:translateX(-100%);transition:transform .2s;padding-top:calc(12px + env(safe-area-inset-top,0px))}
@@ -205,6 +206,10 @@ dialog textarea{min-height:110px;resize:vertical}
   </form>
 </div>
 
+<dialog id="rk">
+  <div class="rkh"><h3 data-i="ranks">Ранги</h3><button class="sm" id="rkX" data-i="close">Закрыть</button></div>
+  <div id="rkb"></div>
+</dialog>
 <dialog id="pv">
   <header><b data-i="prev">Предпросмотр</b><span style="flex:1"></span><button class="sm" id="pvDl" data-i="dl">Скачать</button><button class="sm" id="pvX" data-i="close">Закрыть</button></header>
   <iframe id="pvf" sandbox="allow-scripts allow-forms allow-popups allow-modals" title="preview"></iframe>
@@ -244,6 +249,10 @@ Object.assign(I.ru,{thinking:"Думаю…",thought:"Думал",sec:"с",fbwhy
 Object.assign(I.en,{thinking:"Thinking…",thought:"Thought for",sec:"s",fbwhy:"What was wrong? (optional)",remembered:"Remembered",undo:"undo",agt:"Agent mode: plan → search & code → verify",agent:"Agent (plan, search, code, verify)",automem:"Auto memory",dset:"Download dataset (JSONL)",rated:"Ratings"});
 Object.assign(I.en,{account:"Account",profile:"Profile",yname:"What should I call you",signin:"Sign-in methods",linked:"connected",linkg:"Link Google",pwd:"Password",newpass:"New password (6+ characters)",setpass:"Change password",passok:"Password changed",think:"Thinking mode",deep:"Deep (smarter, slower)",fast:"Fast",web:"Web search",won:"Always",woff:"Off",mem:"Memory",memh:"What Mark AI should remember about you (used in all chats)",data:"Data",export:"Export my chats",clearall:"Delete all chats",clearq:"Delete all chats?",withg:"Continue with Google"});
 Object.assign(I.ru,{plans:"Тарифы",search:"Поиск по чатам",mic:"Голосовой ввод",rsb:"Глубокое исследование (тариф Pro и выше)",meterUse:"сообщ.",meterImg:"фото",resetIn:"Сброс через",h:"ч",min:"мин",plansTitle:"Тарифы Mark AI",perMonth:"в месяц",free:"Бесплатно",curPlan:"Текущий",choose:"Выбрать",payLater:"Оплата скоро появится. Пока тариф можно получить у владельца сайта.",pl_basic:"Быстрая модель, поиск в интернете, ссылки и файлы",pl_plus:"Умная модель для сложных вопросов и агентный режим",pl_pro:"Глубокое мышление и глубокое исследование с источниками",pl_programmer:"Всё из Pro и эксперт по программированию с запуском кода",plcost:"Обычное сообщение = 1 использование, агент = 3, глубокое исследование = 5. Лимит обновляется через 5 часов после первого сообщения.",limitMsg:"Лимит исчерпан. Он обновится через {t}. Можно перейти на тариф выше.",tierMsg:"Эта функция доступна с тарифа {p}.",stopped:"Остановлено.",regen:"Ответить заново",edit:"Изменить и отправить заново",speak:"Озвучить",file:"Скачать как",fWord:"Word (.docx)",fPdf:"PDF",fXls:"Excel (.xlsx)",fMd:"Markdown (.md)",fTxt:"Текст (.txt)",saveCode:"Скачать файл",ctags:"Мои хештеги",ctn:"Название (без #)",cti:"Что он значит",ctadd:"Добавить хештег",forgot:"Забыли пароль?",resend:"Отправить письмо ещё раз",sent:"Письмо отправлено на {e}. Открой его и нажми ссылку подтверждения.",resetSent:"Письмо для смены пароля отправлено на почту.",setnew:"Введи новый пароль в разделе «Способы входа» кабинета.",app:"Приложение",install:"Установить на телефон или компьютер",installed:"Приложение уже установлено.",iosHint:"Чтобы установить: в меню браузера выбери «Установить приложение» (на iPhone: «Поделиться» → «На экран Домой»).",sheet:"Таблица"});
+Object.assign(I.ru,{ranks:"Ранги",buyRank:"Купить ранг",yourRank:"Твой ранг",rankFree:"Сейчас оплата отключена: на время тестирования ранги выдаются бесплатно на 30 дней.",rankOk:"Ранг {p} активирован на 30 дней (бесплатно, тестовый режим).",rankErr:"Не удалось активировать ранг",needAcc:"Для рангов нужен аккаунт. Войди или зарегистрируйся."});
+Object.assign(I.ru,{fast:"Быстрый агент (бесплатно)",pl_basic:"Только быстрый агент: быстрая модель, поиск в интернете, ссылки и файлы",pl_plus:"Умная модель, глубокое мышление и агент с проверкой",modesHint:"Что доступно на каком ранге. Бесплатный ранг даёт только быстрого агента, остальное платное.",mode_fast:"Быстрый агент (бесплатно)",mode_deep:"Глубокое мышление",mode_agent:"Агент с проверкой",mode_research:"Глубокое исследование",mode_code:"Режим программиста"});
+Object.assign(I.en,{fast:"Fast agent (free)",pl_basic:"Fast agent only: fast model, web search, links and files",pl_plus:"Smart model, deep thinking and an agent with verification",modesHint:"What each rank unlocks. The free rank gives only the fast agent, everything else is paid.",mode_fast:"Fast agent (free)",mode_deep:"Deep thinking",mode_agent:"Agent with verification",mode_research:"Deep research",mode_code:"Programmer mode"});
+Object.assign(I.en,{ranks:"Ranks",buyRank:"Buy a rank",yourRank:"Your rank",rankFree:"Payments are off for now: during testing ranks are given for free for 30 days.",rankOk:"The {p} rank is active for 30 days (free, test mode).",rankErr:"Could not activate the rank",needAcc:"Ranks need an account. Please log in or sign up."});
 Object.assign(I.en,{plans:"Plans",search:"Search chats",mic:"Voice input",rsb:"Deep research (Pro and above)",meterUse:"msgs",meterImg:"images",resetIn:"Resets in",h:"h",min:"min",plansTitle:"Mark AI plans",perMonth:"per month",free:"Free",curPlan:"Current",choose:"Choose",payLater:"Payments are coming soon. For now ask the site owner for a plan.",pl_basic:"Fast model, web search, links and files",pl_plus:"Smarter model for hard questions and agent mode",pl_pro:"Deep thinking and deep research with sources",pl_programmer:"Everything in Pro plus a programming expert that runs code",plcost:"A regular message = 1 use, agent = 3, deep research = 5. The limit resets 5 hours after the first message.",limitMsg:"Limit reached. It resets in {t}. You can upgrade your plan.",tierMsg:"This feature needs the {p} plan.",stopped:"Stopped.",regen:"Regenerate",edit:"Edit and resend",speak:"Read aloud",file:"Download as",fWord:"Word (.docx)",fPdf:"PDF",fXls:"Excel (.xlsx)",fMd:"Markdown (.md)",fTxt:"Text (.txt)",saveCode:"Download file",ctags:"My hashtags",ctn:"Name (without #)",cti:"What it means",ctadd:"Add hashtag",forgot:"Forgot password?",resend:"Resend the email",sent:"Email sent to {e}. Open it and tap the confirmation link.",resetSent:"A password reset email has been sent.",setnew:"Enter your new password in the account page (Sign-in methods).",app:"App",install:"Install on phone or computer",installed:"The app is already installed.",iosHint:"To install: use “Install app” in the browser menu (iPhone: Share → Add to Home Screen).",sheet:"Table"});
 let imgMode=false,agentMode=false,researchMode=false,RECOV=false,tick=null,NP=null,busy=false,ctrl=null,pend=[],PV="";
 
@@ -389,6 +398,7 @@ function drawAcc(root){
   const row=el$("div","who2");row.appendChild(el$("div","av big",(S.name||(SES?SES.user.email:"M"))[0].toUpperCase()));
   const info=el$("div"),nm=el$("input","nm");nm.value=S.name||"";nm.placeholder=L("yname");nm.oninput=()=>{S.name=nm.value;save()};
   info.appendChild(nm);info.appendChild(el$("small","",SES?SES.user.email:L("guest")));row.appendChild(info);x.appendChild(row);
+  {const cu=(USG&&USG.tier)||"basic",rr=el$("div","kf");rr.appendChild(el$("span","",L("yourRank")+": "+((PLANS.find(p=>p.id===cu)||{}).name||cu)));const bb=el$("button","btn pri",L("buyRank"));bb.onclick=()=>openRanks();rr.appendChild(bb);x.appendChild(rr)}
   if(SB&&SES){x=sec(L("signin"));
     const prov=[...new Set([...(SES.user.identities||[]).map(i=>i.provider),...((SES.user.app_metadata||{}).providers||[])])];
     const li=(name,ok,btn)=>{const r=el$("div","kf");r.appendChild(el$("span","",name));if(ok)r.appendChild(el$("small","",L("linked")));else if(btn)r.appendChild(btn);x.appendChild(r)};
@@ -398,10 +408,14 @@ function drawAcc(root){
     const pb=el$("button","btn",L("setpass")),msg=el$("small");
     pb.onclick=async()=>{try{const r=await fetch(SB_URL+"/auth/v1/user",{method:"PUT",headers:sbh(await token()),body:JSON.stringify({password:pw.value})});const j=await r.json();if(!r.ok)throw new Error(j.msg||j.message||j.error_description||"error");msg.textContent=L("passok");pw.value=""}catch(e){msg.textContent=e.message}};
     fld(x,L("pwd"),pw);x.appendChild(pb);x.appendChild(msg)}
+  x=sec(L("ranks"));x.appendChild(el$("small","",L("modesHint")));
+  [["fast","⚡"],["deep","🧠"],["agent","🤖"],["research","🔎"],["code","💻"]].forEach(([k,ic])=>{const need=MODE_NEED[k],ok=rankIdx(myRank())>=rankIdx(need),r=el$("div","kf");r.appendChild(el$("span","",ic+" "+L("mode_"+k)));r.appendChild(el$("small","",(ok?"✓ ":"🔒 ")+rankName(need)));x.appendChild(r)});
+  planCards(x);if(freeRanks())x.appendChild(el$("small","",L("rankFree")));
   x=sec(L("cfgTitle"));
   fld(x,L("lang"),sel([["auto","Auto"],["ru","Русский"],["en","English"],["az","Azərbaycanca"],["tr","Türkçe"],["de","Deutsch"]],S.lang||"auto",v=>{S.lang=v;save();render()}));
   fld(x,L("theme"),sel([["auto",L("tAuto")],["light",L("tLight")],["dark",L("tDark")]],S.theme||"auto",v=>{S.theme=v;save();render()}));
-  fld(x,L("think"),sel([["auto",L("tAuto")],["deep",L("deep")],["agent",L("agent")],["fast",L("fast")]],S.think||"auto",v=>{S.think=v;save()}));
+  {const ms=["auto","fast","deep","agent"],lab=k=>({auto:L("tAuto"),fast:L("fast"),deep:L("deep"),agent:L("agent")}[k])+(canMode(k)?"":" 🔒 "+rankName(MODE_NEED[k])),c0=canMode(S.think||"auto")?(S.think||"auto"):"auto";
+    const sl=sel(ms.map(k=>[k,lab(k)]),c0,v=>{if(!canMode(v)){sl.value=c0;lockMsg(v);return}S.think=v;save()});fld(x,L("think"),sl)}
   fld(x,L("web"),sel([["auto",L("tAuto")],["on",L("won")],["off",L("woff")]],S.web||"auto",v=>{S.web=v;save()}));
   fld(x,L("automem"),sel([["on",L("won")],["off",L("woff")]],S.automem||"on",v=>{S.automem=v;save()}));
   const ta=el$("textarea");ta.rows=4;ta.value=S.sys;ta.oninput=()=>{S.sys=ta.value.trim()||DEF_SYS;save()};fld(x,L("sys"),ta);
@@ -427,15 +441,34 @@ async function refreshUsage(){if(!SB||!SES)return;try{const r=await fetch(SB_URL
 function usageBars(p,u){const row=(label,a,b)=>{p.appendChild(el$("b","",label+" "+a+"/"+b));const bar=el$("div","bar2"),i=document.createElement("i");i.style.width=Math.min(100,b?a/b*100:0)+"%";bar.appendChild(i);p.appendChild(bar)};
   row(L("meterUse"),u.uses,u.max_uses);row(L("meterImg"),u.images,u.max_images);p.appendChild(el$("div","",L("resetIn")+" "+fmtReset(u.reset_at)))}
 function drawMeter(){const m=$("#meter");if(!USG||!SB){m.style.display="none";return}m.style.display="block";m.textContent="";m.appendChild(el$("div","",(PLANS.find(p=>p.id===USG.tier)||{}).name||USG.tier));usageBars(m,USG)}
-function drawPlans(el){el.innerHTML="";const pg=el$("div","pg");el.appendChild(pg);pg.appendChild(el$("h2","",L("plansTitle")));
-  const cu=(USG&&USG.tier)||"basic";if(USG){const b=el$("div","sec");usageBars(b,USG);pg.appendChild(b)}
-  const g=el$("div","plans");pg.appendChild(g);
+function planCards(parent){const cu=(USG&&USG.tier)||"basic",g=el$("div","plans");
   PLANS.forEach(p=>{const c=el$("div","plan"+(p.id===cu?" cur":""));c.appendChild(el$("h3","",p.name));
     const pr=el$("div","pr",p.price?"$"+p.price:L("free"));if(p.price)pr.appendChild(el$("small","","  "+L("perMonth")));c.appendChild(pr);
     const ul=el$("ul");[p.uses+" "+L("meterUse")+" / 5 "+L("h"),p.img+" "+L("meterImg")+" / 5 "+L("h"),L("pl_"+p.id)].forEach(t=>ul.appendChild(el$("li","",t)));c.appendChild(ul);
     const b=el$("button","btn"+(p.id===cu?"":" pri"),p.id===cu?L("curPlan"):L("choose"));b.disabled=p.id===cu;if(p.id==="basic"&&cu!=="basic")b.style.display="none";
-    b.onclick=()=>{const l=PLAN_LINKS[p.id];if(l)window.open(l+(l.includes("?")?"&":"?")+"email="+encodeURIComponent(SES?SES.user.email:""),"_blank");else alert(L("payLater"))};c.appendChild(b);g.appendChild(c)});
-  pg.appendChild(el$("small","",L("plcost")))}
+    b.onclick=()=>buyRank(p.id);c.appendChild(b);g.appendChild(c)});
+  parent.appendChild(g)}
+const freeRanks=()=>!Object.values(PLAN_LINKS).some(Boolean);
+const RANKS=["basic","plus","pro","programmer"],MODE_NEED={fast:"basic",auto:"basic",deep:"plus",agent:"plus",research:"pro",code:"programmer"};
+const rankIdx=t=>Math.max(0,RANKS.indexOf(t||"basic")),rankName=id=>(PLANS.find(p=>p.id===id)||{}).name||id;
+function myRank(){return(!SB||!SES||!USG)?"programmer":USG.tier}   // без аккаунтов ограничений нет, сервер всё равно проверит
+function canMode(m){return rankIdx(myRank())>=rankIdx(MODE_NEED[m]||"basic")}
+function lockMsg(m){openRanks(L("tierMsg").replace("{p}",rankName(MODE_NEED[m])))}
+function drawPlans(el){el.innerHTML="";const pg=el$("div","pg");el.appendChild(pg);pg.appendChild(el$("h2","",L("plansTitle")));
+  if(USG){const b=el$("div","sec");usageBars(b,USG);pg.appendChild(b)}
+  if(freeRanks())pg.appendChild(el$("small","",L("rankFree")));
+  planCards(pg);pg.appendChild(el$("small","",L("plcost")))}
+function openRanks(msg){const d=$("#rk"),fill=()=>{const b=$("#rkb");b.textContent="";if(msg){const m=el$("b","rknote",msg);m.style.color="var(--acc)";b.appendChild(m)}if(freeRanks())b.appendChild(el$("small","rknote",L("rankFree")));planCards(b);b.appendChild(el$("small","rknote",L("plcost")))};
+  fill();if(!d.open)d.showModal();refreshUsage().then(()=>{if(d.open)fill()})}
+async function buyRank(id){const l=PLAN_LINKS[id];
+  if(l){window.open(l+(l.includes("?")?"&":"?")+"email="+encodeURIComponent(SES?SES.user.email:""),"_blank");return}
+  if(!SB||!SES){alert(L("needAcc"));return}
+  try{const r=await fetch(SB_URL+"/rest/v1/rpc/claim_tier",{method:"POST",headers:sbh(await token()),body:JSON.stringify({new_tier:id})});
+    if(r.status===404){alert(L("rankErr")+": supabase.sql");return}
+    const j=await r.json().catch(()=>null);
+    if(j&&j.ok){await refreshUsage();if($("#rk").open)$("#rk").close();if(S.view==="acc")drawPV();alert(L("rankOk").replace("{p}",(PLANS.find(p=>p.id===id)||{}).name||id))}
+    else alert(j&&j.error==="payment_required"?L("payLater"):L("rankErr")+": "+((j&&j.error)||r.status))}
+  catch(e){alert(L("rankErr")+": "+e.message)}}
 async function failResp(r){const t=await r.text();let j=null;try{j=JSON.parse(t)}catch(e){}
   if(j&&j.error==="limit"){USG=j;drawMeter();const e=new Error(L("limitMsg").replace("{t}",fmtReset(j.reset_at)));e.soft=true;throw e}
   if(j&&j.error==="tier"){const e=new Error(L("tierMsg").replace("{p}",(PLANS.find(p=>p.id===j.need)||{}).name||j.need));e.soft=true;throw e}
@@ -545,7 +578,7 @@ async function send(text){
   c.updated=Date.now();
   const a={role:"assistant",content:"",live:true},t0=Date.now();
   if(wantImg){a.kind="img";a.w="imgwait"}else{a.think={ms:0,steps:[],th:""};a.thinking=true;startTick(a,t0)}
-  c.msgs.push(a);const think=researchMode?"research":agentMode?"agent":(S.think||"auto");agentMode=false;researchMode=false;$("#agb").classList.remove("on");$("#rsb").classList.remove("on");
+  c.msgs.push(a);let think=researchMode?"research":agentMode?"agent":(S.think||"auto");if(!canMode(think))think="auto";agentMode=false;researchMode=false;$("#agb").classList.remove("on");$("#rsb").classList.remove("on");
   let fail="",ok=true;
   busy=true;$("#send").textContent="■";save();render();
   const upd=()=>{const w=$("#wrap").lastElementChild;if(!w||!w.querySelector(".ans"))return;drawThink(w.querySelector(".tk"),a);
@@ -624,8 +657,8 @@ $("#in").addEventListener("paste",e=>{const fs=[...(e.clipboardData?.files||[])]
 $("#att").onclick=()=>$("#fi").click();
 $("#fi").onchange=e=>{addFiles([...e.target.files]);e.target.value=""};
 $("#imgb").onclick=()=>{imgMode=!imgMode;$("#imgb").classList.toggle("on",imgMode);applyLang();$("#in").focus()};
-$("#agb").onclick=()=>{agentMode=!agentMode;$("#agb").classList.toggle("on",agentMode);$("#in").focus()};
-$("#rsb").onclick=()=>{researchMode=!researchMode;$("#rsb").classList.toggle("on",researchMode);if(researchMode){agentMode=false;$("#agb").classList.remove("on")}$("#in").focus()};
+$("#agb").onclick=()=>{if(!canMode("agent")){lockMsg("agent");return}agentMode=!agentMode;$("#agb").classList.toggle("on",agentMode);$("#in").focus()};
+$("#rsb").onclick=()=>{if(!canMode("research")){lockMsg("research");return}researchMode=!researchMode;$("#rsb").classList.toggle("on",researchMode);if(researchMode){agentMode=false;$("#agb").classList.remove("on")}$("#in").focus()};
 $("#mic").onclick=toggleMic;if(!SR)$("#mic").style.display="none";
 $("#nPlan").onclick=()=>setView("plans");$("#meter").onclick=()=>setView("plans");
 $("#qs").oninput=()=>drawList();
@@ -639,6 +672,7 @@ $("#wrap").onclick=e=>{
   const p=e.target.closest("[data-prev]");if(p){PV=p.closest(".code").querySelector("pre").textContent;$("#pvf").srcdoc=PV;$("#pv").showModal();return}
   const sv=e.target.closest("[data-save]");if(sv){const cd=sv.closest(".code");dl(cd.querySelector("pre").textContent,"code."+(EXT[(cd.dataset.lang||"").toLowerCase()]||"txt"),"text/plain");return}
   const b=e.target.closest("[data-copy]");if(b){navigator.clipboard.writeText(b.closest(".code").querySelector("pre").textContent);b.textContent=L("copied");setTimeout(()=>b.textContent=L("copy"),1200)}};
+$("#rkX").onclick=()=>$("#rk").close();
 $("#pvX").onclick=()=>{$("#pv").close();$("#pvf").srcdoc=""};
 $("#pvDl").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([PV],{type:"text/html"}));a.download="index.html";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
 
