@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Mark AI</title>
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="manifest%20(1).webmanifest">
 <meta name="theme-color" content="#0a0d2e">
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192%20(1).png">
+<link rel="apple-touch-icon" href="icon-192%20(1).png">
 <meta name="mobile-web-app-capable" content="yes">
 <style>
 :root{--bg:#f7f7fa;--panel:#fff;--side:#eeeef5;--line:#e0e1ec;--text:#1e2133;--mute:#6b7089;--acc:#5656d6;--acc2:#e6e6fa;--user:#e9e9f5;--code:#f1f1f7;--r:14px;--pop:#fff;--glow:rgba(86,86,214,.3)}
@@ -789,7 +789,7 @@ async function oauthReturn(){const h=location.hash;if(!/access_token=|error_desc
   size();addEventListener("resize",size);
   if(!reduce){addEventListener("pointermove",e=>{mx=e.clientX/W-.5;my=e.clientY/H-.5});document.addEventListener("visibilitychange",()=>{run=!document.hidden;if(run){last=0;requestAnimationFrame(frame)}});requestAnimationFrame(frame)}
 })();
-if("serviceWorker"in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
+if("serviceWorker"in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw%20(1).js").catch(()=>{});
 S=blank();
 (async()=>{const err=SB?await oauthReturn():"";if(SB&&!SES){showAuth();$("#authErr").textContent=err;render()}else{await boot();if(RECOV){setView("acc");setTimeout(()=>alert(L("setnew")),200)}}})();
 </script>
